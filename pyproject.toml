@@ -1,0 +1,22 @@
+[project]
+name = "se-bankruptcy-stress-scenarios"
+version = "0.1.0"
+description = "Satellite model linking Swedish corporate bankruptcy rates by industry to macro scenarios"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["data", "reports/site"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "NPY"]
+ignore = ["N803", "N806"]  # allow math-style capitals (X, B) in model code
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
