@@ -166,3 +166,35 @@ scenarios each macro series is spliced to KI's forecast at its own last publishe
 The pipeline writes Parquet when pyarrow is installed (it is in `requirements.txt`). Only
 the CSV copies are committed, because they give readable diffs and every number can be
 rebuilt from `data/raw/` with `python -m src.pipeline`.
+
+### A6 (2026-11-23, phase 3): model selection, committed before the test period is evaluated
+
+Selection used only forecasts whose target quarter is ≤ 2022Q4 (32 origins, 2014Q4–2022Q3).
+Firm-weighted MAE of the annualised rate at h = 4, in percentage points
+(`reports/tables/backtest_selection_summary.csv`):
+
+| Specification | MAE h=4 | MASE h=4 |
+|---|---|---|
+| A, k=0 | 0.082 | 1.12 |
+| C, k=0 | 0.083 | 1.14 |
+| B, k=0 | 0.084 | 1.14 |
+| A, k=1 | 0.090 | 1.23 |
+| A, k=2 | 0.092 | 1.26 |
+| A, k=3 | 0.099 | 1.35 |
+| A, k=4 | 0.104 | 1.42 |
+| A, k=0, no trend | 0.105 | 1.42 |
+
+**Selected: variant A with lag 0** (common slopes, same-quarter macro drivers, with trend).
+Sector-specific slopes (B, C) did not improve the backtest, so per section 8 they are not
+used, and headline statements are made in percent (common) and percentage points (sector).
+
+Two results are recorded here, before the test period is opened, because they matter for
+how the model is presented:
+
+- In the selection period **no satellite specification beats seasonal naive at h = 4**
+  (MASE > 1); A_k0 beats it at h = 1 (MASE 0.91) and h = 8 (0.88). The no-macro baseline
+  has the same h = 4 MAE as A_k0 (0.082). The macro terms therefore add little to point
+  accuracy at one year in this period; their role is to translate scenarios into rates.
+- **The 80 % intervals cover only 57–69 %** of outcomes. Parameter uncertainty and NB noise
+  do not capture persistent sector-level deviations, so the intervals are too narrow. This
+  is reported as a limitation, and scenario intervals are described as lower bounds.
