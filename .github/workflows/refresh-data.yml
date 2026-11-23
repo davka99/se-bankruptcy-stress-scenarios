@@ -67,7 +67,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add data reports
+          git add data reports README.md
           git commit -m "Refresh data snapshot $(date -u +%Y-%m-%d)" || { echo "Nothing to commit"; exit 0; }
           git push origin "$branch"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
@@ -92,7 +92,11 @@ jobs:
             tail -n 30 /tmp/pytest.txt
             echo '```'
             echo
-            echo "Review the monitoring log (reports/tables/monitoring_log.csv) before merging."
+            echo "## Monitoring (latest rows of reports/tables/monitoring_log.csv)"
+            echo '```'
+            tail -n 9 reports/tables/monitoring_log.csv
+            echo '```'
+            echo "Review the monitoring log and the forecast register before merging."
           } > /tmp/body.md
           gh pr create --base main --head "${{ steps.commit.outputs.branch }}" \
             --title "Data refresh $(date -u +%Y-%m-%d)" --body-file /tmp/body.md
