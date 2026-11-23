@@ -27,6 +27,8 @@ BUILD_STEPS = [
     ("src.backtest", "main_test"),
     ("src.realtime", "main"),
     ("src.model_report", "main"),
+    ("src.scenarios", "main"),
+    ("src.portfolio_overlay", "main"),
 ]
 
 
