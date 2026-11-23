@@ -11,12 +11,13 @@ from src.fetch.common import Snapshot, http_session, pxweb_v1_query, request_wit
 
 log = logging.getLogger(__name__)
 
-QUERIES = {
-    "monthly_by_sector": {"Tid": None, "Bransch": None, "variabel": ["0"]},
-    "monthly_by_county": {"Tid": None, "Län": None, "variabel": ["0"]},
-    # Region and size class are eliminated (summed by the server) if the table allows it.
-    "monthly_detail": {"Tid": None, "Bransch": None, "Juridisk_form": None, "variabel": ["0"]},
-}
+
+def selection_from_metadata(meta: dict) -> dict[str, list[str] | None]:
+    """All values of every variable, except `variabel` = '0' (number of bankruptcies)."""
+    selection: dict[str, list[str] | None] = {}
+    for var in meta["variables"]:
+        selection[var["code"]] = ["0"] if var["code"] == "variabel" else None
+    return selection
 
 
 def table_url(table: str) -> str:
@@ -35,11 +36,11 @@ def fetch(snapshot_date: str | None = None) -> Snapshot:
         url = table_url(table)
         meta = request_with_retry(session, "GET", url)
         snap.save(f"{key}_metadata.json", meta.content, url=url)
-        query = pxweb_v1_query(QUERIES[key])
+        query = pxweb_v1_query(selection_from_metadata(json.loads(meta.content)))
         try:
             data = request_with_retry(session, "POST", url, json=query)
         except Exception as err:  # optional tables must not stop the pipeline
-            if key == "monthly_detail":
+            if key == "annual_by_sector_legal_form":
                 log.warning("Optional table %s failed: %s", table, err)
                 continue
             raise

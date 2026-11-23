@@ -18,8 +18,9 @@ from src.fetch.common import Snapshot, http_session, pxweb_v1_query, request_wit
 
 log = logging.getLogger(__name__)
 
-PAUSE = 0.4  # seconds between calls, to stay well below the portal's rate limit
+PAUSE = 0.25  # seconds between calls, to stay well below the portal's rate limit
 VINTAGE_TABLES = ["unemployment_q", "gdp_q", "policy_rate_m"]
+FALLBACKS = {"unemployment_q": "unemployment_q_old"}
 
 
 def _url(*parts: str) -> str:
@@ -42,8 +43,14 @@ def _find_tables(session, base_parts: list[str], depth: int = 0) -> dict[str, li
     return found
 
 
-def _selection(variable: str | None) -> dict[str, list[str] | None]:
-    return {"variabel": [variable] if variable else None, "enhet": None, "period": None}
+def _selection(meta: dict, variable: str | None) -> dict[str, list[str] | None]:
+    """All values of every variable in the table, except `variabel` when one is given."""
+    selection: dict[str, list[str] | None] = {}
+    for var in meta["variables"]:
+        code = var["code"]
+        keep = variable is not None and code == "variabel" and variable in var["values"]
+        selection[code] = [variable] if keep else None
+    return selection
 
 
 def _fetch_table(session, snap: Snapshot, parts: list[str], variable: str | None, name: str):
@@ -51,7 +58,7 @@ def _fetch_table(session, snap: Snapshot, parts: list[str], variable: str | None
     time.sleep(PAUSE)
     meta = request_with_retry(session, "GET", url)
     snap.save(f"{name}_metadata.json", meta.content, url=url)
-    query = pxweb_v1_query(_selection(variable))
+    query = pxweb_v1_query(_selection(json.loads(meta.content), variable))
     time.sleep(PAUSE)
     data = request_with_retry(session, "POST", url, json=query)
     snap.save(f"{name}.json", data.content, url=url, method="POST", query=query)
@@ -82,6 +89,10 @@ def fetch(snapshot_date: str | None = None, vintages: bool = True) -> Snapshot:
             for name in VINTAGE_TABLES:
                 _, table, variable = config.KI_TABLES[name]
                 stem = table.split(".")[0]
+                if stem not in tables and name in FALLBACKS:
+                    name = FALLBACKS[name]
+                    _, table, variable = config.KI_TABLES[name]
+                    stem = table.split(".")[0]
                 if stem not in tables:
                     missing.append(f"{vintage_id}:{stem}")
                     continue

@@ -46,8 +46,9 @@ TVA_TABLES = {
     "monthly_by_sector": "12_konkurser_manad_tot_bransch.px",
     # monthly bankruptcies by county (independent total for the sum check)
     "monthly_by_county": "11_konkurser_manad_lan.px",
-    # monthly by industry x region x legal form x size class (legal-form split)
-    "monthly_detail": "14_konkurser_manad_kom_bransch_juridisk_form_storleksklass_popAH.px",
+    # annual bankruptcies by industry and legal form (the monthly table with legal form has
+    # ~2.4 million cells because region cannot be eliminated, which the API refuses)
+    "annual_by_sector_legal_form": "02_konkurser_ar_tot_bransch_jurform.px",
 }
 # Validation anchor: Tillväxtanalys, Statistik 2024:02, Table 1, p. 10
 TVA_ANCHOR_REPORT_URL = (
@@ -57,6 +58,8 @@ TVA_ANCHOR_REPORT_URL = (
 
 # D3-D5: SCB PxWebApi v2 (GET). v1 is switched off at the turn of 2026/2027.
 SCB_API = "https://statistikdatabasen.scb.se/api/v2"
+# Alternative v2 host, tried if the main host does not answer (diagnosed in the fetch log)
+SCB_API_ALTERNATIVES = ["https://api.scb.se/OV0104/v2beta/api/v2"]
 SCB_TABLES = {
     # D3 FDB: enterprises by SNI 2007 and size class, annual, reference month November
     "fdb_firms": "TAB5166",
@@ -98,6 +101,8 @@ KI_LATEST_DB = "SenastePrognosen"
 KI_VINTAGE_DB = "TidigarePrognoser"
 KI_TABLES = {
     "unemployment_q": ("f21_arbetsmarknad", "F2108.px", "F2108Arali1574"),
+    # older vintages (before Dec 2023) only have the quarterly AKU table F2104
+    "unemployment_q_old": ("f21_arbetsmarknad", "F2104.px", None),
     "unemployment_a": ("f21_arbetsmarknad", "F2107.px", None),
     "gdp_q": ("f09_bnpkonsumtioninvesteringarochutrikeshandel", "F0905.px", "F0905Nbnpmpfs"),
     "gdp_a": ("f09_bnpkonsumtioninvesteringarochutrikeshandel", "F0901.px", None),
