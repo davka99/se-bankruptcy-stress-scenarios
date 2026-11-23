@@ -256,3 +256,8 @@ lags, especially for the policy rate; a sector-level persistence term).
   the development environment. It is a baseline only; the NB2 estimator is the one
   cross-checked against statsmodels.
 - **Pages:** `pages.yml` only runs when the repository is public (Pages on a free account).
+- **Cross-environment reproducibility:** a full pipeline run on GitHub's Ubuntu runner
+  (pinned versions) gave the same `key_numbers.json`, README and memo as the development
+  run. Detail tables differ only at floating-point level (MAE < 1e-6 pp); simulated
+  interval coverage can differ by up to about 1 percentage point because the random draws
+  depend on the linear-algebra backend. Re-running in the same environment is exact.
