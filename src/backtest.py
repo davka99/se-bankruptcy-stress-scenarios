@@ -49,6 +49,8 @@ def _nb_forecasts(
     n_sim: int,
 ) -> pd.DataFrame:
     X = satellite.design(target_rows, macro, fitted.spec)
+    complete = X.notna().all(axis=1).to_numpy()  # e.g. GDP not yet published for the target
+    X, target_rows = X[complete], target_rows[complete]
     offset = np.log(target_rows["firms"].to_numpy(dtype=float))
     mu = fitted.mu(X, offset)
     sims = fitted.simulate(X, offset, n_sim, rng)
@@ -146,6 +148,11 @@ def summarise(bt: pd.DataFrame) -> pd.DataFrame:
     """Firm-weighted MAE, MASE vs seasonal naive, coverage and CRPS per model x horizon x period."""
     bt = bt.copy()
     bt["period"] = period_of(bt["quarter"])
+    # Compare models on the same forecasts only (some targets lack published drivers).
+    keys = ["origin", "quarter", "sector"]
+    bt["_key"] = bt[keys].astype(str).agg("|".join, axis=1)
+    common = set.intersection(*(set(g["_key"]) for _, g in bt.groupby("model")))
+    bt = bt[bt["_key"].isin(common)].drop(columns="_key")
     snaive = bt[bt["model"] == "seasonal_naive"].set_index(["origin", "quarter", "sector"])[
         "abs_err"
     ]
@@ -257,3 +264,36 @@ def main_selection(out: Path = config.TABLES) -> dict:
     (out / "model_selection.json").write_text(json.dumps(selection, indent=2))
     log.info("Selected model: %s", selection)
     return selection
+
+
+def main_test(out: Path = config.TABLES) -> pd.DataFrame:
+    import json
+
+    panel, macro = load_inputs()
+    selected = json.loads((out / "model_selection.json").read_text())["selected"]
+    test = run_test(panel, macro, selected)
+    test.to_csv(out / "backtest_test_detail.csv", index=False)
+    sel = pd.read_csv(out / "backtest_selection_detail.csv", dtype={"origin": str, "quarter": str})
+    keep = ["seasonal_naive", "ets", "NOMACRO", selected]
+    combined = pd.concat([sel[sel["model"].isin(keep)], test], ignore_index=True)
+    summary = summarise(combined)
+    summary["model"] = summary["model"].replace({selected: f"satellite ({selected})"})
+    summary.to_csv(out / "backtest.csv", index=False)
+    return summary
+
+
+def smoke(tmp: Path) -> None:
+    """CI smoke test on the small synthetic fixture (data/fixtures, `synthetic`)."""
+    panel = pd.read_csv(config.FIXTURES / "synthetic_panel.csv", dtype={"quarter": str})
+    macro = pd.read_csv(config.FIXTURES / "synthetic_macro.csv", dtype={"quarter": str})
+    macro = macro.set_index("quarter")
+    bt = run(
+        panel,
+        macro,
+        [satellite.Spec("A_k1", lag=1)],
+        origin_list=[pd.Period("2015Q4", "Q")],
+        n_sim=100,
+    )
+    summary = summarise(bt)
+    summary.to_csv(tmp / "smoke_backtest_synthetic.csv", index=False)
+    log.info("Smoke backtest on synthetic fixture: %d rows", len(bt))

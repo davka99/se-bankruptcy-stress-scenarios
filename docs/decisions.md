@@ -198,3 +198,22 @@ how the model is presented:
 - **The 80 % intervals cover only 57–69 %** of outcomes. Parameter uncertainty and NB noise
   do not capture persistent sector-level deviations, so the intervals are too narrow. This
   is reported as a limitation, and scenario intervals are described as lower bounds.
+
+### A7 (2026-11-23, phase 3): untouched test period, evaluated once after A6
+
+Targets 2023Q1–2026Q2 (126 forecasts per horizon on the common set; 2026Q3 lacks published
+GDP). Firm-weighted MAE in pp, h = 4: seasonal naive 0.100, ETS 0.108, **satellite A_k0
+0.171**, NB without macro 0.182. MASE of the satellite model at h = 4 is 1.70 and coverage
+of its 80 % intervals is 38 %.
+
+The satellite model therefore **does not beat seasonal naive** in the test period, but it
+does beat the no-macro baseline (so the macro terms add information). The 2023–2024 rise
+was larger than the model's macro drivers imply, and seasonal naive benefits from the high
+persistence of rates. This is reported as is in the README. The model is still used for
+scenarios, because a scenario model must map macro paths to rates, which the naive and ETS
+baselines cannot do, but its intervals are presented as too narrow and its level path as
+uncertain.
+
+Not changed after seeing the test period: the specification, lag, trend and variables.
+Candidates for a future pre-registered round are listed under Limitations (variable-specific
+lags, especially for the policy rate; a sector-level persistence term).
