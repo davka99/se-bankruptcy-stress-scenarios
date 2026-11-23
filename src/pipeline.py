@@ -22,6 +22,7 @@ FETCHERS = ["tillvaxtanalys", "scb", "riksbank", "ki", "eba"]
 # (module, function) in run order; later phases add their steps here.
 BUILD_STEPS = [
     ("src.build_panel", "main"),
+    ("src.eda", "main"),
 ]
 
 
@@ -55,7 +56,9 @@ def run_smoke() -> None:
             getattr(importlib.import_module(module), func)(Path(tmp))
 
 
-SMOKE_STEPS: list[tuple[str, str]] = []
+SMOKE_STEPS: list[tuple[str, str]] = [
+    ("src.eda", "main"),
+]
 
 
 def main(argv: list[str] | None = None) -> int:
