@@ -28,3 +28,5 @@ jobs:
           ruff format --check .
       - name: Test
         run: python -m pytest
+      - name: Pipeline smoke test (offline, from committed raw data)
+        run: python -m src.pipeline --smoke

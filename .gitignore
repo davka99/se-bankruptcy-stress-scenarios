@@ -20,3 +20,6 @@ Thumbs.db
 # Quarto build output
 reports/site/_site/
 reports/site/.quarto/
+
+# Parquet copies are rebuilt by the pipeline (CSV copies are committed)
+data/processed/*.parquet

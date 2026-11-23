@@ -9,7 +9,7 @@ the committed snapshots are recorded per file in `data/raw/<source>/<date>/manif
 |---|---|---|---|---|---|---|---|
 | D1 | Company bankruptcies by industry and month | Tillväxtanalys statistics portal, PxWeb **API v1** (POST), table `12_konkurser_manad_tot_bransch.px` ("Konkurser per månad 2009M01–2026M10, efter bransch", updated 2026-11-05) | `Bransch` (13 codes incl. `bransch_ospecificerad`), `variabel=0` (number of bankruptcies) | 2009M01–2026M10, monthly | json-stat2 | Group codes are SNI 2007 ranges (`01-03` … `85-99`); see SNI note below | **Better than planned:** the whole series from 2009 is in one table, so no SCB → Tillväxtanalys splice is needed. The portal runs PxWeb API v1, not v2. |
 | D1 (total) | Company bankruptcies by county and month | Tillväxtanalys table `11_konkurser_manad_lan.px` | `Län` (21 counties) | 1996M01–2026M10 | json-stat2 | – | Used as an independent national total for the sum check (the industry table has no total row). |
-| D1 (detail) | Bankruptcies by industry, region, legal form, size class | Tillväxtanalys table `14_konkurser_manad_kom_bransch_juridisk_form_storleksklass_popAH.px` | `Juridisk_form` (`a` limited companies, `e` sole traders, `h` partnerships) | 2009M01–2026M10 | json-stat2 | as D1 | Legal-form and size-class splits **exist** per industry and month. |
+| D1 (detail) | Bankruptcies by industry, region, legal form, size class | Tillväxtanalys table `14_konkurser_manad_kom_bransch_juridisk_form_storleksklass_popAH.px` | `Juridisk_form` (`a` limited companies, `e` sole traders, `h` partnerships) | 2009M01–2026M10 | json-stat2 | as D1 | Legal-form and size-class splits exist per industry and month, but region cannot be eliminated and the API refuses the ~2.4 million-cell query (HTTP 403). The annual table `02_konkurser_ar_tot_bransch_jurform.px` is fetched instead. |
 | D1 (reserve) | SCB NV1401 | SCB | – | stops May 2024 | – | – | Not needed (see D1). SCB stopped publishing with May 2024. |
 | D2 | Latest months | Same tables as D1 | – | Latest: October 2026, published 12 Nov 2026 | – | – | D1 does not lag, so D2 is the same table. Preliminary/revised flags are **not** exposed in the table metadata; the latest month is treated as preliminary (`is_preliminary`). |
 | D3 | Number of enterprises by industry (denominator) | SCB FDB (NV0101), PxWebApi v2 table **`TAB5166`** ("Företag (FDB) efter näringsgren SNI2007 och storleksklass. År 2008–2025", updated 2025-12-02) | SNI 2007 divisions (2-digit codes), all size classes | 2008–2025, annual (reference: November) | json-stat2 | SNI 2007 | The planned ID `FDBR07N` was the v1 name; the v2 ID is `TAB5166`. Population: all legal and natural persons registered for VAT, F-tax or as employers (includes dormant units). The 2026 stock (expected Dec 2026) may be coded in SNI 2025; it is first needed for 2027 quarters. |
@@ -24,11 +24,13 @@ the committed snapshots are recorded per file in `data/raw/<source>/<date>/manif
 
 ## Validation anchor
 
-Tillväxtanalys, *Konkurser och offentliga ackord 2023* (Statistik 2024:02), Table 1, p. 10:
+Tillväxtanalys, *Konkurser och offentliga ackord 2023* (Statistik 2024:02), Table 1 (page 9 of 24):
 "Andel av befintliga företag 2023, procent" by industry. The report says the denominator is
 "all existing companies" in the industry but does not name the register or reference date.
-The published shares are stored in `data/reference/validation_anchor_2023.csv` and are
-compared with our rates in `tests/test_data_quality.py`.
+The published counts and shares are stored in `data/reference/validation_anchor_2023.csv`
+(checked against the PDF, which is also kept in the raw snapshot). Our 2023 bankruptcy
+counts by sector match the report exactly, and our FDB-based rates reproduce all nine
+published shares after rounding (see `docs/decisions.md`, amendment A1).
 
 ## SNI 2007 → SNI 2025
 

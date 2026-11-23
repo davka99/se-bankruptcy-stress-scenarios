@@ -11,7 +11,9 @@ import argparse
 import importlib
 import logging
 import sys
+import tempfile
 import traceback
+from pathlib import Path
 
 log = logging.getLogger("pipeline")
 
@@ -41,15 +43,34 @@ def run_build() -> None:
         getattr(importlib.import_module(module), func)()
 
 
+def run_smoke() -> None:
+    """Parse the committed raw data into a temporary folder and run smoke steps."""
+    from src import build_panel
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tables = build_panel.build()
+        build_panel.write(tables, Path(tmp))
+        log.info("Smoke: panels built (%s quarterly rows)", len(tables["panel_quarterly"]))
+        for module, func in SMOKE_STEPS:
+            getattr(importlib.import_module(module), func)(Path(tmp))
+
+
+SMOKE_STEPS: list[tuple[str, str]] = []
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--offline", action="store_true", help="build from committed raw data")
     mode.add_argument("--refresh", action="store_true", help="fetch new data, then build")
     mode.add_argument("--fetch-only", action="store_true", help="fetch new data only")
+    mode.add_argument("--smoke", action="store_true", help="quick offline smoke test")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
+    if args.smoke:
+        run_smoke()
+        return 0
     failed: list[str] = []
     if args.refresh or args.fetch_only:
         failed = run_fetch()

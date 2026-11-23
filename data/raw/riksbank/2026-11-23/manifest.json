@@ -1,0 +1,41 @@
+{
+  "source": "riksbank",
+  "snapshot_date": "2026-11-23",
+  "files": [
+    {
+      "file": "policy_rate.json",
+      "url": "https://api.riksbank.se/swea/v1/Observations/SECBREPOEFF/2007-01-01/2026-11-23",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:32+00:00",
+      "rows": 4998,
+      "bytes": 170207,
+      "sha256": "4689d0671048f5dba8b759a51805b48d9f1a4970703ab2999459800802d2ae00",
+      "note": null
+    },
+    {
+      "file": "stibor_3m_closed.json",
+      "url": "https://api.riksbank.se/swea/v1/Observations/SEDP3MSTIBORDELAYC/2007-01-01/2026-11-23",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:32+00:00",
+      "rows": 3389,
+      "bytes": 122314,
+      "sha256": "58bc655522403723d127969d0b30147c2eb4cf240749fda1df1723da1770668c",
+      "note": null
+    },
+    {
+      "file": "series_list.json",
+      "url": "https://api.riksbank.se/swea/v1/Series",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:32+00:00",
+      "rows": 117,
+      "bytes": 35745,
+      "sha256": "732bc47cf444916829c56922d790bc1acb5a3b7066150737974463a3db03f878",
+      "note": null
+    }
+  ],
+  "api": "SWEA v1",
+  "api_key_used": false
+}

@@ -58,7 +58,6 @@ jobs:
           echo "ruff=$?" >> "$GITHUB_OUTPUT"
           python -m pytest > /tmp/pytest.txt 2>&1
           echo "pytest=$?" >> "$GITHUB_OUTPUT"
-          cp /tmp/pytest.txt data/raw/_pytest_log.txt
           tail -n 20 /tmp/pytest.txt
 
       - name: Commit snapshot to a new branch

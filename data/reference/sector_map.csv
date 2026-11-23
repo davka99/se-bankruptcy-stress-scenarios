@@ -1,0 +1,23 @@
+source,source_code,source_label,sector,sector_label
+tillvaxtanalys,01-03,"01-03 Jord-, skogsbruk och fiske",AGR,"Agriculture, forestry and fishing (SNI 01-03)"
+tillvaxtanalys,05-39,05-39 Tillverkningsindustri m.fl.,MAN,"Manufacturing, mining and utilities (SNI 05-39)"
+tillvaxtanalys,41-43,41-43 Byggindustri,CON,Construction (SNI 41-43)
+tillvaxtanalys,45,45 Handel med samt reparation av motorfordon,TRD,Wholesale and retail trade (SNI 45-47)
+tillvaxtanalys,46,46 Parti- och provisionshandel utom med motorfordon,TRD,Wholesale and retail trade (SNI 45-47)
+tillvaxtanalys,47,47 Detaljhandel utom med motorfordon,TRD,Wholesale and retail trade (SNI 45-47)
+tillvaxtanalys,49-53,49-53 Transport och magasinsering,TRN,Transport and storage (SNI 49-53)
+tillvaxtanalys,55,55 Hotell- och logiverksamhet,HOR,Hotels and restaurants (SNI 55-56)
+tillvaxtanalys,56,"56 Restaurang-, catering och barverksamhet",HOR,Hotels and restaurants (SNI 55-56)
+tillvaxtanalys,58-63,58-63 Information och kommunikation,ICT,Information and communication (SNI 58-63)
+tillvaxtanalys,64-82,"64-82 Finans-, fastighets- och företagstjänster",FRB,"Finance, real estate and business services (SNI 64-82)"
+tillvaxtanalys,85-99,"85-99 Utbildning, hälso- och sjukvård, övriga personliga tjänster",EHO,"Education, health and other services (SNI 85-99)"
+tillvaxtanalys,bransch_ospecificerad,Bransch ospecificerad,UNS,Unspecified industry
+scb_fdb,01-03,SNI 2007 divisions,AGR,"Agriculture, forestry and fishing (SNI 01-03)"
+scb_fdb,05-39,SNI 2007 divisions,MAN,"Manufacturing, mining and utilities (SNI 05-39)"
+scb_fdb,41-43,SNI 2007 divisions,CON,Construction (SNI 41-43)
+scb_fdb,45-47,SNI 2007 divisions,TRD,Wholesale and retail trade (SNI 45-47)
+scb_fdb,49-53,SNI 2007 divisions,TRN,Transport and storage (SNI 49-53)
+scb_fdb,55-56,SNI 2007 divisions,HOR,Hotels and restaurants (SNI 55-56)
+scb_fdb,58-63,SNI 2007 divisions,ICT,Information and communication (SNI 58-63)
+scb_fdb,64-82,SNI 2007 divisions,FRB,"Finance, real estate and business services (SNI 64-82)"
+scb_fdb,85-99,SNI 2007 divisions,EHO,"Education, health and other services (SNI 85-99)"

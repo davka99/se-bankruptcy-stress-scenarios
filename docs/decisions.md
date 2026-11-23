@@ -131,4 +131,38 @@ reported at 1.10 and 1.50 as a sensitivity, but the decision uses 1.25.
 
 ## Amendments
 
-(none yet)
+### A1 (2026-11-23, phase 1, before any model estimation): primary denominator = FDB
+
+Applying the rule in section 4 to the first data snapshot: mean absolute deviation from
+Tillväxtanalys' published 2023 shares is **0.030 pp for FDB** (max 0.048) and 0.192 pp for
+FEK (max 0.328). FDB with the November 2022 stock reproduces all nine published shares
+after rounding to one decimal, so it is almost certainly the denominator the report uses.
+FDB is primary; FEK is kept as a sensitivity column (`rate_fek`). Note that FEK excludes
+financial corporations and divisions 97-99, which explains part of its larger deviation.
+
+### A2 (2026-11-23, phase 1): denominator variant (c) dropped
+
+Bankruptcies by industry x legal form exist monthly only in a table where region cannot be
+eliminated (about 2.4 million cells), which the API refuses (HTTP 403). The annual table
+by industry and legal form is fetched for description. FDB by legal form is not available
+in the same table either, so the limited-company denominator variant is not built.
+
+### A3 (2026-11-23, phase 1): SNI 2025 level-jump check passed
+
+The level-jump test (y/y log change of 3-month sums starting at 2026M01 vs the 99th
+percentile of each sector's own history, pandemic months excluded) flags no sector. The
+largest absolute changes were AGR (+0.27, threshold 0.75) and HOR (-0.25, threshold 0.55).
+The full sample to the latest quarter is kept. `data/reference/documented_breaks.csv` is
+therefore not needed.
+
+### A4 (2026-11-23, phase 1): publication lags
+
+SCB publishes GDP about two months after the quarter, so GDP can lag the bankruptcy data by
+one quarter. Rows without all drivers for a specification are dropped from that fit; in
+scenarios each macro series is spliced to KI's forecast at its own last published quarter.
+
+### A5 (2026-11-23, phase 1): Parquet copies are not committed
+
+The pipeline writes Parquet when pyarrow is installed (it is in `requirements.txt`). Only
+the CSV copies are committed, because they give readable diffs and every number can be
+rebuilt from `data/raw/` with `python -m src.pipeline`.

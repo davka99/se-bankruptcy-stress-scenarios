@@ -1,0 +1,289 @@
+{
+  "source": "tillvaxtanalys",
+  "snapshot_date": "2026-11-23",
+  "files": [
+    {
+      "file": "table_listing.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:11+00:00",
+      "rows": 14,
+      "bytes": 2151,
+      "sha256": "76edf9098192c506d17f60e89c4af4eb317217174c5866faf34a6d53616c4d1a",
+      "note": null
+    },
+    {
+      "file": "monthly_by_sector_metadata.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/12_konkurser_manad_tot_bransch.px",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:12+00:00",
+      "rows": null,
+      "bytes": 5255,
+      "sha256": "34f242a5399cd5774d695e747518ebdaa46bb0103070cdaab29037f68426ca20",
+      "note": null
+    },
+    {
+      "file": "monthly_by_sector.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/12_konkurser_manad_tot_bransch.px",
+      "method": "POST",
+      "query": {
+        "query": [
+          {
+            "code": "Tid",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "Bransch",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "variabel",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "0"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      },
+      "retrieved_at": "2026-11-23T17:19:12+00:00",
+      "rows": 2782,
+      "bytes": 16926,
+      "sha256": "8fbfc58c0136b6c9de30acc54903ed934ca9286d36f71054bb494afd36e7e6ce",
+      "note": null
+    },
+    {
+      "file": "monthly_by_county_metadata.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/11_konkurser_manad_lan.px",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:13+00:00",
+      "rows": null,
+      "bytes": 8290,
+      "sha256": "b7f4c96fe53162aec39fd28379280383261296a638a50e2edd635ca1e28222a8",
+      "note": null
+    },
+    {
+      "file": "monthly_by_county.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/11_konkurser_manad_lan.px",
+      "method": "POST",
+      "query": {
+        "query": [
+          {
+            "code": "Tid",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "Län",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "variabel",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "0"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      },
+      "retrieved_at": "2026-11-23T17:19:14+00:00",
+      "rows": 7770,
+      "bytes": 35713,
+      "sha256": "33c28c54200fc84852021cbb2eb901f3d0cf6186c2eec732548e9db341340162",
+      "note": null
+    },
+    {
+      "file": "annual_by_sector_legal_form_metadata.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/02_konkurser_ar_tot_bransch_jurform.px",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:14+00:00",
+      "rows": null,
+      "bytes": 1419,
+      "sha256": "cf7e5f89fedf872c5e25b733e5fc336f558f98d0a7b3bb29616afb34a81836b4",
+      "note": null
+    },
+    {
+      "file": "annual_by_sector_legal_form.json",
+      "url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1/sv/Tillv%C3%A4xtanalys%20statistikdatabas/Konkurser%20och%20offentliga%20ackord/02_konkurser_ar_tot_bransch_jurform.px",
+      "method": "POST",
+      "query": {
+        "query": [
+          {
+            "code": "Tid",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "Bransch",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "Juridisk_form",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "variabel",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "0"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      },
+      "retrieved_at": "2026-11-23T17:19:14+00:00",
+      "rows": 836,
+      "bytes": 7032,
+      "sha256": "2af80b0966b6d6252fc096b0912e38bea5d113a689460eac7ce6931a47edc534",
+      "note": null
+    },
+    {
+      "file": "validation_anchor_report_2023.pdf",
+      "url": "https://tillvaxtanalys.se/download/18.3469032218e5fb1783c189dc/1715931573755/Statistik_2024_02%20Konkurser%20och%20offentliga%20ackord%202023.pdf",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:19:17+00:00",
+      "rows": null,
+      "bytes": 547036,
+      "sha256": "d436111de3f0d29968fa4ef2c460c40a40125cacaf9a9bca2707b1ca84db74c7",
+      "note": "Statistik 2024:02, Table 1 p. 10 holds the validation anchor"
+    }
+  ],
+  "api": "PxWeb v1",
+  "listing": [
+    {
+      "id": "01_konkurser_ackord_ar.px",
+      "type": "t",
+      "text": "Konkurser och offentliga ackord per år 1996-",
+      "updated": "2026-01-12T15:36:32"
+    },
+    {
+      "id": "02_konkurser_ar_tot_bransch_jurform.px",
+      "type": "t",
+      "text": "Konkurser per år 2009-, efter bransch och juridisk form",
+      "updated": "2026-01-12T15:38:26"
+    },
+    {
+      "id": "03_konkurser_ar_tot_bransch_storleksklass.px",
+      "type": "t",
+      "text": "Konkurser per år 2009-, efter bransch och storleksklass",
+      "updated": "2026-01-12T15:38:55"
+    },
+    {
+      "id": "04_konkurser_ar_tot_jurform.px",
+      "type": "t",
+      "text": "Konkurser per år 1996-, efter juridisk form",
+      "updated": "2026-01-12T15:39:53"
+    },
+    {
+      "id": "05_konkurser_ar_kom.px",
+      "type": "t",
+      "text": "Konkurser per år 1996-, efter kommun",
+      "updated": "2026-01-12T15:10:37"
+    },
+    {
+      "id": "06_konkurser_ar_lan_bransch.px",
+      "type": "t",
+      "text": "Konkurser per år 2009-, efter län och bransch",
+      "updated": "2026-01-20T08:10:54"
+    },
+    {
+      "id": "07_konkurser_ar_lan_jurform.px",
+      "type": "t",
+      "text": "Konkurser per år 1996-, efter län och juridisk form",
+      "updated": "2026-01-12T15:35:34"
+    },
+    {
+      "id": "08_konkurser_ar_lan_storleksklass.px",
+      "type": "t",
+      "text": "Konkurser per år 1996-, efter län och storleksklass",
+      "updated": "2026-01-12T15:38:01"
+    },
+    {
+      "id": "09_konkurser_ar_tot_sni2.px",
+      "type": "t",
+      "text": "Konkurser per år 2009-, efter bransch (SNI2 med vissa grupperingar)",
+      "updated": "2026-01-12T15:40:20"
+    },
+    {
+      "id": "10_konkurser_ar_tot_storleksklass.px",
+      "type": "t",
+      "text": "Konkurser per år 1996-, efter storleksklass",
+      "updated": "2026-01-12T15:40:43"
+    },
+    {
+      "id": "11_konkurser_manad_lan.px",
+      "type": "t",
+      "text": "Konkurser per månad 1996M01-2026M10, efter län",
+      "updated": "2026-11-05T11:22:25"
+    },
+    {
+      "id": "12_konkurser_manad_tot_bransch.px",
+      "type": "t",
+      "text": "Konkurser per månad 2009M01-2026M10, efter bransch",
+      "updated": "2026-11-05T11:22:24"
+    },
+    {
+      "id": "13_anstallda_manad_kom_bransch_juridisk_form_popAH.px",
+      "type": "t",
+      "text": "Anställda berörda av konkurser 2009M01-2026M10, efter bransch, region och juridisk form",
+      "updated": "2026-11-12T01:24:25"
+    },
+    {
+      "id": "14_konkurser_manad_kom_bransch_juridisk_form_storleksklass_popAH.px",
+      "type": "t",
+      "text": "Konkurser 2009M01-2026M10, efter bransch, region, juridisk form och storleksklass",
+      "updated": "2026-11-12T01:24:39"
+    }
+  ]
+}

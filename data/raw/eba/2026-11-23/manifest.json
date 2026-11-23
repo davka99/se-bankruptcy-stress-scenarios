@@ -1,0 +1,18 @@
+{
+  "source": "eba",
+  "snapshot_date": "2026-11-23",
+  "files": [
+    {
+      "file": "macro_financial_scenario_2025_corrigendum.xlsx",
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-03/d0668400-aed7-40d7-b668-1f77eb24b934/2025%20EU-wide%20stress%20test%20-%20Macro%20financial%20scenario%20%28updated%2026%20February%202025%29-incl%20disclaimer%20for%20EBA%20%285%29.xlsx",
+      "method": "GET",
+      "query": null,
+      "retrieved_at": "2026-11-23T17:43:34+00:00",
+      "rows": null,
+      "bytes": 279436,
+      "sha256": "26877a4f3ba576703955f766b104bc02ce2bac8b427f5150afabeb9cc9f383c9",
+      "note": "EBA 2025 EU-wide stress test, macro-financial scenario, corrigendum 2025-02-26"
+    }
+  ],
+  "vintage": "EBA 2025 EU-wide stress test, macro-financial scenario, corrigendum 2025-02-26"
+}

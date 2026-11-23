@@ -1,0 +1,35 @@
+2026-11-23 17:19:10,164 pipeline INFO Fetching tillvaxtanalys
+2026-11-23 17:19:12,893 src.fetch.tillvaxtanalys INFO Tillväxtanalys 12_konkurser_manad_tot_bransch.px: 16926 bytes
+2026-11-23 17:19:14,426 src.fetch.tillvaxtanalys INFO Tillväxtanalys 11_konkurser_manad_lan.px: 35713 bytes
+2026-11-23 17:19:14,849 src.fetch.tillvaxtanalys INFO Tillväxtanalys 02_konkurser_ar_tot_bransch_jurform.px: 7032 bytes
+2026-11-23 17:19:17,127 pipeline INFO Fetching scb
+2026-11-23 17:19:18,706 src.fetch.scb INFO SCB probe https://statistikdatabasen.scb.se/api/v2/tables/TAB5166/metadata?lang=sv -> 200 {"version":"2.0","class":"dataset","label":"Företag (FDB) efter näringsgren SNI2007 och storleksklass. År 2008-2025","source":"SCB","updated":"2025-12-02T07:00:00Z","link":{"related":[{"extension":{"r
+2026-11-23 17:19:19,519 src.fetch.scb INFO SCB fdb_firms (TAB5166): 15590 bytes
+2026-11-23 17:19:22,035 src.fetch.scb INFO SCB fek_firms_2000_2021 (TAB600): 118449 bytes
+2026-11-23 17:19:23,795 src.fetch.scb INFO SCB fek_firms_2022_ (TAB6017): 19668 bytes
+2026-11-23 17:19:28,415 src.fetch.scb INFO SCB aku_monthly (TAB6387): 16564 bytes
+2026-11-23 17:19:30,912 src.fetch.scb INFO SCB gdp_sa (TAB4553): 9083 bytes
+2026-11-23 17:19:30,913 pipeline INFO Fetching riksbank
+2026-11-23 17:19:32,069 src.fetch.riksbank INFO Riksbank SECBREPOEFF: 170207 bytes
+2026-11-23 17:19:32,313 src.fetch.riksbank INFO Riksbank SEDP3MSTIBORDELAYC: 122314 bytes
+2026-11-23 17:19:32,542 pipeline INFO Fetching ki
+2026-11-23 17:43:33,951 pipeline INFO Fetching eba
+2026-11-23 17:43:34,962 pipeline INFO Running src.build_panel.main
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/se-bankruptcy-stress-scenarios/se-bankruptcy-stress-scenarios/src/pipeline.py", line 65, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/se-bankruptcy-stress-scenarios/se-bankruptcy-stress-scenarios/src/pipeline.py", line 57, in main
+    run_build()
+  File "/home/runner/work/se-bankruptcy-stress-scenarios/se-bankruptcy-stress-scenarios/src/pipeline.py", line 41, in run_build
+    getattr(importlib.import_module(module), func)()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'src.build_panel'
