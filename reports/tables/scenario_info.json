@@ -1,0 +1,13 @@
+{
+  "start_quarter": "2026Q3",
+  "horizon_quarters": 12,
+  "n_sim": 5000,
+  "model": "A_k0",
+  "ki_vintage": {
+    "database": "SenastePrognosen",
+    "table_title": "Arbetsl\u00f6shet och syssels\u00e4ttningsgrad",
+    "retrieved": "2026-11-23T17:19:33+00:00",
+    "latest_vintage_id_in_archive": "20260930"
+  },
+  "eba_vintage": "EBA 2025 EU-wide stress test, macro-financial scenario, corrigendum 2025-02-26"
+}

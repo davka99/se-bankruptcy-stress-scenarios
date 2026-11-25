@@ -23,3 +23,6 @@ reports/site/.quarto/
 
 # Parquet copies are rebuilt by the pipeline (CSV copies are committed)
 data/processed/*.parquet
+reports/site/figures/
+reports/site/index.html
+reports/site/index_files/

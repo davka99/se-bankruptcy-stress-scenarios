@@ -166,3 +166,98 @@ scenarios each macro series is spliced to KI's forecast at its own last publishe
 The pipeline writes Parquet when pyarrow is installed (it is in `requirements.txt`). Only
 the CSV copies are committed, because they give readable diffs and every number can be
 rebuilt from `data/raw/` with `python -m src.pipeline`.
+
+### A6 (2026-11-23, phase 3): model selection, committed before the test period is evaluated
+
+Selection used only forecasts whose target quarter is ≤ 2022Q4 (32 origins, 2014Q4–2022Q3).
+Firm-weighted MAE of the annualised rate at h = 4, in percentage points
+(`reports/tables/backtest_selection_summary.csv`):
+
+| Specification | MAE h=4 | MASE h=4 |
+|---|---|---|
+| A, k=0 | 0.082 | 1.12 |
+| C, k=0 | 0.083 | 1.14 |
+| B, k=0 | 0.084 | 1.14 |
+| A, k=1 | 0.090 | 1.23 |
+| A, k=2 | 0.092 | 1.26 |
+| A, k=3 | 0.099 | 1.35 |
+| A, k=4 | 0.104 | 1.42 |
+| A, k=0, no trend | 0.105 | 1.42 |
+
+**Selected: variant A with lag 0** (common slopes, same-quarter macro drivers, with trend).
+Sector-specific slopes (B, C) did not improve the backtest, so per section 8 they are not
+used, and headline statements are made in percent (common) and percentage points (sector).
+
+Two results are recorded here, before the test period is opened, because they matter for
+how the model is presented:
+
+- In the selection period **no satellite specification beats seasonal naive at h = 4**
+  (MASE > 1); A_k0 beats it at h = 1 (MASE 0.91) and h = 8 (0.88). The no-macro baseline
+  has the same h = 4 MAE as A_k0 (0.082). The macro terms therefore add little to point
+  accuracy at one year in this period; their role is to translate scenarios into rates.
+- **The 80 % intervals cover only 57–69 %** of outcomes. Parameter uncertainty and NB noise
+  do not capture persistent sector-level deviations, so the intervals are too narrow. This
+  is reported as a limitation, and scenario intervals are described as lower bounds.
+
+### A7 (2026-11-23, phase 3): untouched test period, evaluated once after A6
+
+Targets 2023Q1–2026Q2 (126 forecasts per horizon on the common set; 2026Q3 lacks published
+GDP). Firm-weighted MAE in pp, h = 4: seasonal naive 0.100, ETS 0.108, **satellite A_k0
+0.171**, NB without macro 0.182. MASE of the satellite model at h = 4 is 1.70 and coverage
+of its 80 % intervals is 38 %.
+
+The satellite model therefore **does not beat seasonal naive** in the test period, but it
+does beat the no-macro baseline (so the macro terms add information). The 2023–2024 rise
+was larger than the model's macro drivers imply, and seasonal naive benefits from the high
+persistence of rates. This is reported as is in the README. The model is still used for
+scenarios, because a scenario model must map macro paths to rates, which the naive and ETS
+baselines cannot do, but its intervals are presented as too narrow and its level path as
+uncertain.
+
+Not changed after seeing the test period: the specification, lag, trend and variables.
+Candidates for a future pre-registered round are listed under Limitations (variable-specific
+lags, especially for the policy rate; a sector-level persistence term).
+
+### A8 (2026-11-23, phase 4): scenario construction and watchlist outcome
+
+- **Start and horizon:** start 2026Q3 (last complete bankruptcy quarter), 12 quarters.
+  Exposure held at the November 2025 FDB stock. Pandemic dummy 0.
+- **Baseline:** KI `SenastePrognosen` (archive vintage 20260930). Unemployment uses KI's
+  quarterly table to 2027Q4 and then the annual table, interpolated with annual values at
+  mid-year. GDP levels are spliced to SCB's last published quarter by KI's growth rates.
+  Policy rate: KI's monthly averages.
+- **Adverse:** annual EBA deviations (adverse − baseline) for scenario years 1–3, reached
+  at the middle of each scenario year and interpolated linearly from 0 at the start, flat
+  after year 3: +3.8, +7.1, +7.0 pp unemployment; −5.5 %, −13.2 %, −14.5 % GDP level
+  (log); +1.2, +1.0, +0.8 pp short rate. EBA has a 3M SEK swap rate, not the policy rate;
+  its deviation is used for the policy rate.
+- **Plausibility check against EBA sector GVA:** the macro-financial scenario workbook
+  (corrigendum, Feb 2025) contains no sector GVA sheet, so this check is **not done**.
+- **Watchlist outcome:** the pre-registered rule flags **all nine** industries under the
+  adverse scenario (and also at 1.10 and 1.50). This follows from the selected model's
+  common slope: every industry's rate rises by about the same percentage. The rule does
+  not discriminate with variant A. To produce a usable shortlist, industries are
+  **prioritised by the increase in percentage points** (worst window median minus
+  historical mean). This prioritisation was chosen after seeing the scenario results and
+  is labelled as such; the pre-registered rule itself is reported unchanged.
+
+### A9 (2026-11-23, phase 5): presentation and monitoring
+
+- **Numbers in documents are generated.** `src/report_numbers.py` writes
+  `reports/tables/key_numbers.json`; README, decision memo and Quarto report are rendered
+  from templates in `docs/` by `python -m src.render_readme`, and `tests/test_readme.py`
+  fails if a committed document differs from a fresh rendering.
+- **Monitoring backfill:** the log starts with one-quarter-ahead forecasts from the
+  conditional backtest in the test period (labelled `backfill`). Every pipeline run then
+  registers the baseline forecast for the next quarter (`forecast_register.csv`); the
+  monthly refresh evaluates it once the quarter is complete (labelled `live`).
+- **ETS baseline:** implemented in-house as additive Holt-Winters with damped trend on
+  log rates (`src/models/baselines.py`), because statsmodels could not be installed in
+  the development environment. It is a baseline only; the NB2 estimator is the one
+  cross-checked against statsmodels.
+- **Pages:** `pages.yml` only runs when the repository is public (Pages on a free account).
+- **Cross-environment reproducibility:** a full pipeline run on GitHub's Ubuntu runner
+  (pinned versions) gave the same `key_numbers.json`, README and memo as the development
+  run. Detail tables differ only at floating-point level (MAE < 1e-6 pp); simulated
+  interval coverage can differ by up to about 1 percentage point because the random draws
+  depend on the linear-algebra backend. Re-running in the same environment is exact.

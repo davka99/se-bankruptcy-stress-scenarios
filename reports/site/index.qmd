@@ -1,0 +1,129 @@
+---
+title: "Swedish SME Bankruptcy Rates under Macro Stress"
+subtitle: "A satellite model linking bankruptcies by industry to macro scenarios"
+date: last-modified
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+    fig-align: left
+---
+
+## Summary
+
+Under an EBA-based adverse scenario the 12-month bankruptcy rate across nine industries peaks
+at **0.95 per 100 firms** in 2027Q4 (80 % interval
+0.85–1.06), against 0.72 in
+the latest four quarters. In Konjunkturinstitutet's baseline the rate eases to
+0.60. A 1 percentage-point rise in unemployment over a year is associated with a
++11.6 % change in expected bankruptcies (95 % CI +6.5 to +16.9 %).
+
+![](figures/hero.png)
+
+The model does not beat a seasonal-naive forecast one year ahead in the untouched test period
+(MAE 0.171 vs 0.100 pp), and its 80 % intervals covered only
+38 % of outcomes. The scenario paths should be read as directional.
+
+## Data and validation
+
+Bankruptcies come from Tillväxtanalys (monthly by industry, 2009 onwards, one table), firms
+from SCB's Business Register (FDB, November stock), unemployment and GDP from SCB, and the
+policy rate from the Riksbank. The rate is bankruptcies per quarter × 4 divided by the
+previous November's stock. With this denominator our 2023 rates reproduce all nine shares
+published by Tillväxtanalys after rounding (mean absolute deviation 0.030 pp).
+The nine industries plus "unspecified" add up exactly to the independent county total in
+every month.
+
+## Exploratory analysis
+
+![](figures/eda_sector_rates_over_time.png)
+
+![](figures/eda_heatmap_rate_sector_year.png)
+
+![](figures/eda_cross_correlations.png)
+
+![](figures/eda_seasonality.png)
+
+![](figures/eda_unspecified_share.png)
+
+## Model
+
+Negative binomial (NB2) regression of quarterly counts with log(firms) as offset, industry
+fixed effects, quarterly seasonality, a trend, a pandemic-support dummy (2020Q2–2021Q4,
+-26.0 %, CI -33.4 to -17.7 %) and three macro drivers. Poisson
+is clearly overdispersed (Pearson χ²/df 5.05; NB2: 1.11).
+
+| Driver (same quarter) | Effect on bankruptcies | 95 % CI |
+|---|---|---|
+| Unemployment, +1 pp y/y | +11.6 % | +6.5 to +16.9 % |
+| GDP growth, +1 % y/y | +0.5 % | -0.7 to +1.7 % |
+| Policy rate, +1 pp y/y | +0.9 % | -1.7 to +3.5 % |
+
+The specification grid (8 models), the selection metric (firm-weighted MAE at four quarters)
+and the watchlist rule were committed before estimation. Selected: `A_k0`.
+
+![](figures/model_residual_diagnostics.png)
+
+## Backtest
+
+![](figures/backtest_mae.png)
+
+| h = 4, MAE (pp of annual rate) | Selection period | Test period |
+|---|---|---|
+| Satellite | 0.082 | 0.171 |
+| Seasonal naive | 0.073 | 0.100 |
+| ETS | 0.075 | 0.108 |
+| NB2 without macro | 0.082 | 0.182 |
+
+The backtest is conditional on actual macro outcomes. With KI's real-time forecast vintages
+the test-period MAE is 0.184.
+
+## Scenarios
+
+![](figures/scenario_macro_paths.png)
+
+![](figures/scenario_fans_by_sector.png)
+
+| Industry | Rate now | Adverse peak (80 % interval) | Window |
+|---|---|---|---|
+| Hotels and restaurants | 2.50 | 3.06 (2.63–3.55) | 2027Q1–2027Q4 |
+| Construction | 1.56 | 2.07 (1.79–2.38) | 2027Q1–2027Q4 |
+| Trade | 1.53 | 2.07 (1.79–2.38) | 2027Q1–2027Q4 |
+| Transport | 1.52 | 1.93 (1.66–2.24) | 2027Q1–2027Q4 |
+| Manufacturing | 0.75 | 1.22 (1.05–1.42) | 2027Q1–2027Q4 |
+| Information and communication | 0.73 | 0.84 (0.72–0.97) | 2027Q1–2027Q4 |
+| Finance, real estate, business services | 0.55 | 0.75 (0.65–0.86) | 2027Q1–2027Q4 |
+| Education, health, other services | 0.40 | 0.45 (0.39–0.52) | 2027Q1–2027Q4 |
+
+Rates are bankruptcies per 100 firms per year (rolling four quarters for "now", the
+four-quarter window average for the peak). Reverse stress test: unemployment would have to
+rise by 6.3 pp within a year (80 % interval 5.0–8.7)
+to double the bankruptcy rate; with the common slope this threshold is the same for every
+industry.
+
+## Bank perspective (synthetic portfolio)
+
+![](figures/pd_overlay_by_sector.png)
+
+The PD overlay is the scenario rate relative to the industry's historical mean and uses only
+real data. On a **synthetic** 5,000-loan SME portfolio (LGD 45 %, weights 70/30), the
+probability-weighted 12-month ECL is +17 % above the
+through-the-cycle ECL. This is a simplification of IFRS 9: no staging, no SICR, no lifetime PD.
+
+## Monitoring
+
+Each new complete quarter is compared with the model's previous forecast: green inside the
+80 % interval, yellow outside once, red outside two quarters in a row (re-estimation
+trigger). Latest quarter (2026Q2): 6 green,
+1 yellow, 2 red.
+
+## Limitations
+
+Bankruptcy is a late and narrow proxy for default; FDB includes dormant firms; few cycles;
+the pandemic break; the common slope; y/y drivers that fade once unemployment stops rising;
+no scenario probabilities; a simplified ECL on synthetic loans. See the README and
+`docs/decisions.md`.
+
+*Sources: Tillväxtanalys, SCB, Sveriges riksbank, Konjunkturinstitutet, EBA/ESRB. Own
+calculations.*
