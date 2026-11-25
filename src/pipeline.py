@@ -22,6 +22,16 @@ FETCHERS = ["tillvaxtanalys", "scb", "riksbank", "ki", "eba"]
 # (module, function) in run order; later phases add their steps here.
 BUILD_STEPS = [
     ("src.build_panel", "main"),
+    ("src.eda", "main"),
+    ("src.backtest", "main_selection"),
+    ("src.backtest", "main_test"),
+    ("src.realtime", "main"),
+    ("src.model_report", "main"),
+    ("src.scenarios", "main"),
+    ("src.portfolio_overlay", "main"),
+    ("src.monitoring", "main"),
+    ("src.report_numbers", "main"),
+    ("src.render_readme", "main"),
 ]
 
 
@@ -55,7 +65,10 @@ def run_smoke() -> None:
             getattr(importlib.import_module(module), func)(Path(tmp))
 
 
-SMOKE_STEPS: list[tuple[str, str]] = []
+SMOKE_STEPS: list[tuple[str, str]] = [
+    ("src.eda", "main"),
+    ("src.backtest", "smoke"),
+]
 
 
 def main(argv: list[str] | None = None) -> int:
