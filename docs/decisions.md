@@ -240,3 +240,24 @@ lags, especially for the policy rate; a sector-level persistence term).
   **prioritised by the increase in percentage points** (worst window median minus
   historical mean). This prioritisation was chosen after seeing the scenario results and
   is labelled as such; the pre-registered rule itself is reported unchanged.
+
+### A9 (2026-11-23, phase 5): presentation and monitoring
+
+- **Numbers in documents are generated.** `src/report_numbers.py` writes
+  `reports/tables/key_numbers.json`; README, decision memo and Quarto report are rendered
+  from templates in `docs/` by `python -m src.render_readme`, and `tests/test_readme.py`
+  fails if a committed document differs from a fresh rendering.
+- **Monitoring backfill:** the log starts with one-quarter-ahead forecasts from the
+  conditional backtest in the test period (labelled `backfill`). Every pipeline run then
+  registers the baseline forecast for the next quarter (`forecast_register.csv`); the
+  monthly refresh evaluates it once the quarter is complete (labelled `live`).
+- **ETS baseline:** implemented in-house as additive Holt-Winters with damped trend on
+  log rates (`src/models/baselines.py`), because statsmodels could not be installed in
+  the development environment. It is a baseline only; the NB2 estimator is the one
+  cross-checked against statsmodels.
+- **Pages:** `pages.yml` only runs when the repository is public (Pages on a free account).
+- **Cross-environment reproducibility:** a full pipeline run on GitHub's Ubuntu runner
+  (pinned versions) gave the same `key_numbers.json`, README and memo as the development
+  run. Detail tables differ only at floating-point level (MAE < 1e-6 pp); simulated
+  interval coverage can differ by up to about 1 percentage point because the random draws
+  depend on the linear-algebra backend. Re-running in the same environment is exact.

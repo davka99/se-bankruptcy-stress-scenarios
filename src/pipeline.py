@@ -29,6 +29,9 @@ BUILD_STEPS = [
     ("src.model_report", "main"),
     ("src.scenarios", "main"),
     ("src.portfolio_overlay", "main"),
+    ("src.monitoring", "main"),
+    ("src.report_numbers", "main"),
+    ("src.render_readme", "main"),
 ]
 
 
