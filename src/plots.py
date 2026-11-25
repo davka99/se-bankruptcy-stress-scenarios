@@ -46,6 +46,27 @@ def shade_episodes(ax) -> None:
             ax.axvspan(pd.Timestamp(start), pd.Timestamp(end), color=GRID, alpha=0.8, lw=0)
 
 
+def episode_handles() -> list:
+    """Legend entries for the shaded episodes drawn by shade_episodes."""
+    from matplotlib.patches import Patch
+
+    return [
+        Patch(
+            facecolor=GRID,
+            alpha=0.8,
+            lw=0,
+            label="Financial crisis 2009, pandemic support 2020–21",
+        ),
+        Patch(
+            facecolor="none",
+            edgecolor=GRID,
+            hatch="////",
+            lw=0,
+            label="Inflation and rate hikes 2022–24",
+        ),
+    ]
+
+
 def apply_style() -> None:
     plt.rcParams.update(
         {
