@@ -1,0 +1,12 @@
+sector,bankruptcies_2023,share_of_existing_firms_pct,source_label
+AGR,75,0.0,"Jordbruk, skogsbruk och fiske (SNI 01-03)"
+MAN,404,0.7,"Tillverkning och dylikt (SNI 05-39)"
+CON,1725,1.4,"Byggindustri (SNI 41-43)"
+TRD,1876,1.4,"Handel (SNI 45-47)"
+HOR,816,2.3,"Hotell och restaurang (SNI 55-56)"
+TRN,408,1.2,"Transport och magasinering (SNI 49-53)"
+ICT,401,0.5,"Information och kommunikation (SNI 58-63)"
+FRB,1770,0.4,"Finans-, försäkrings- och fastighetsverksamhet (SNI 64-82)"
+EHO,808,0.4,"Utbildning, hälso- och sjukvård (SNI 85-99)"
+UNS,585,8.6,"Okänd bransch"
+TOTAL,8868,0.7,"Samtliga"

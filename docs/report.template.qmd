@@ -1,0 +1,134 @@
+---
+title: "Swedish SME Bankruptcy Rates under Macro Stress"
+subtitle: "A satellite model linking bankruptcies by industry to macro scenarios"
+date: last-modified
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+    fig-align: left
+---
+
+## Summary
+
+Under an EBA-based adverse scenario the 12-month bankruptcy rate across nine industries peaks
+at **{{ total_adverse_peak }} per 100 firms** in {{ total_adverse_peak_q }} (80 % interval
+{{ total_adverse_peak_lo }}–{{ total_adverse_peak_hi }}), against {{ total_rate_latest_4q }} in
+the latest four quarters. In Konjunkturinstitutet's baseline the rate eases to
+{{ total_baseline_min }}. A 1 percentage-point rise in unemployment over a year is associated with a
+{{ irr_d_unemp }} % change in expected bankruptcies (95 % CI {{ irr_d_unemp_ci }} %).
+
+![](figures/hero.png)
+
+The model does not beat a seasonal-naive forecast one year ahead in the untouched test period
+(MAE {{ test_mae_sat }} vs {{ test_mae_snaive }} pp), and its 80 % intervals covered only
+{{ test_cov_sat }} % of outcomes. The scenario paths should be read as directional.
+
+## Data and validation
+
+Bankruptcies come from Tillväxtanalys (monthly by industry, 2009 onwards, one table), firms
+from SCB's Business Register (FDB, November stock), unemployment and GDP from SCB, and the
+policy rate from the Riksbank. The rate is bankruptcies per quarter × 4 divided by the
+previous November's stock. With this denominator our 2023 rates reproduce all nine shares
+published by Tillväxtanalys after rounding (mean absolute deviation {{ anchor_mad_pp }} pp).
+The nine industries plus "unspecified" add up exactly to the independent county total in
+every month.
+
+## Exploratory analysis
+
+![](figures/eda_sector_rates_over_time.png)
+
+![](figures/eda_heatmap_rate_sector_year.png)
+
+![](figures/eda_cross_correlations.png)
+
+![](figures/eda_seasonality.png)
+
+![](figures/eda_unspecified_share.png)
+
+## Model
+
+Negative binomial (NB2) regression of quarterly counts with log(firms) as offset, industry
+fixed effects, quarterly seasonality, a trend, a pandemic-support dummy (2020Q2–2021Q4,
+{{ irr_covid_support }} %, CI {{ irr_covid_support_ci }} %) and macro drivers. Poisson
+is clearly overdispersed (Pearson χ²/df {{ poisson_dispersion }}; NB2: {{ nb_dispersion }}).
+
+| Driver (same quarter) | Round 1 `{{ model_spec }}` | 95 % CI | Round 2 `{{ r2_winner }}` | 95 % CI |
+|---|---|---|---|---|
+| Unemployment, +1 pp y/y | {{ r1_irr_d_unemp }} % | {{ r1_irr_d_unemp_ci }} % | {{ r2_irr_unemp }} % | {{ r2_irr_unemp_ci }} % |
+| GDP growth, +1 % y/y | {{ r1_irr_gdp_yoy }} % | {{ r1_irr_gdp_yoy_ci }} % | – | – |
+| Policy rate, +1 pp y/y | {{ r1_irr_d_policy }} % | {{ r1_irr_d_policy_ci }} % | – | – |
+
+The specification grid (8 models), the selection metric (firm-weighted MAE at four quarters)
+and the watchlist rule were committed before estimation. Selected: `{{ model_spec }}`. After
+the weak test result a second round was pre-registered (A10); it selected `{{ r2_winner }}`
+(unemployment only, plus a fading industry intercept correction), which is {{ r2_improvement_pct }} %
+better in the selection period and is used for the scenarios.
+
+![](figures/round2_backtest_mae.png)
+
+![](figures/model_residual_diagnostics.png)
+
+## Backtest
+
+![](figures/backtest_mae.png)
+
+| h = 4, MAE (pp of annual rate) | Selection period | Test period |
+|---|---|---|
+| Satellite | {{ sel_mae_sat }} | {{ test_mae_sat }} |
+| Seasonal naive | {{ sel_mae_snaive }} | {{ test_mae_snaive }} |
+| ETS | {{ sel_mae_ets }} | {{ test_mae_ets }} |
+| NB2 without macro | {{ sel_mae_nomacro }} | {{ test_mae_nomacro }} |
+
+The backtest is conditional on actual macro outcomes. With KI's real-time forecast vintages
+the test-period MAE is {{ test_mae_sat_realtime }}.
+
+## Scenarios
+
+![](figures/scenario_macro_paths.png)
+
+![](figures/scenario_fans_by_sector.png)
+
+| Industry | Rate now | Adverse peak (80 % interval) | Window |
+|---|---|---|---|
+| Hotels and restaurants | {{ HOR_rate_now }} | {{ HOR_adv_peak }} ({{ HOR_adv_peak_lo }}–{{ HOR_adv_peak_hi }}) | {{ HOR_adv_peak_window }} |
+| Construction | {{ CON_rate_now }} | {{ CON_adv_peak }} ({{ CON_adv_peak_lo }}–{{ CON_adv_peak_hi }}) | {{ CON_adv_peak_window }} |
+| Trade | {{ TRD_rate_now }} | {{ TRD_adv_peak }} ({{ TRD_adv_peak_lo }}–{{ TRD_adv_peak_hi }}) | {{ TRD_adv_peak_window }} |
+| Transport | {{ TRN_rate_now }} | {{ TRN_adv_peak }} ({{ TRN_adv_peak_lo }}–{{ TRN_adv_peak_hi }}) | {{ TRN_adv_peak_window }} |
+| Manufacturing | {{ MAN_rate_now }} | {{ MAN_adv_peak }} ({{ MAN_adv_peak_lo }}–{{ MAN_adv_peak_hi }}) | {{ MAN_adv_peak_window }} |
+| Information and communication | {{ ICT_rate_now }} | {{ ICT_adv_peak }} ({{ ICT_adv_peak_lo }}–{{ ICT_adv_peak_hi }}) | {{ ICT_adv_peak_window }} |
+| Finance, real estate, business services | {{ FRB_rate_now }} | {{ FRB_adv_peak }} ({{ FRB_adv_peak_lo }}–{{ FRB_adv_peak_hi }}) | {{ FRB_adv_peak_window }} |
+| Education, health, other services | {{ EHO_rate_now }} | {{ EHO_adv_peak }} ({{ EHO_adv_peak_lo }}–{{ EHO_adv_peak_hi }}) | {{ EHO_adv_peak_window }} |
+
+Rates are bankruptcies per 100 firms per year (rolling four quarters for "now", the
+four-quarter window average for the peak). Reverse stress test: unemployment would have to
+rise by {{ double_unemp_pp }} pp within a year (80 % interval {{ double_unemp_lo }}–{{ double_unemp_hi }})
+to double the bankruptcy rate; with the common slope this threshold is the same for every
+industry.
+
+## Bank perspective (synthetic portfolio)
+
+![](figures/pd_overlay_by_sector.png)
+
+The PD overlay is the scenario rate relative to the industry's historical mean and uses only
+real data. On a **synthetic** 5,000-loan SME portfolio (LGD 45 %, weights 70/30), the
+probability-weighted 12-month ECL is {{ synthetic_ecl_weighted_vs_ttc }} % above the
+through-the-cycle ECL. This is a simplification of IFRS 9: no staging, no SICR, no lifetime PD.
+
+## Monitoring
+
+Each new complete quarter is compared with the model's previous forecast: green inside the
+80 % interval, yellow outside once, red outside two quarters in a row (re-estimation
+trigger). Latest quarter ({{ monitoring_quarter }}): {{ monitoring_green }} green,
+{{ monitoring_yellow }} yellow, {{ monitoring_red }} red.
+
+## Limitations
+
+Bankruptcy is a late and narrow proxy for default; FDB includes dormant firms; few cycles;
+the pandemic break; the common slope; y/y drivers that fade once unemployment stops rising;
+no scenario probabilities; a simplified ECL on synthetic loans. See the README and
+`docs/decisions.md`.
+
+*Sources: Tillväxtanalys, SCB, Sveriges riksbank, Konjunkturinstitutet, EBA/ESRB. Own
+calculations.*
