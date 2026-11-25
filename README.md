@@ -6,9 +6,13 @@ project links official Swedish bankruptcy statistics to unemployment, GDP and th
 rate, and runs a baseline and an EBA-style adverse scenario through that model. Under the
 adverse scenario the 12-month bankruptcy rate for the modelled industries peaks at
 **0.98 per 100 firms** (2027Q4), against
-0.72 today. Full report: [Quarto report](https://davka99.github.io/se-bankruptcy-stress-scenarios/) (published when the repository is public).
+0.72 today. Full report: [Quarto report](https://davka99.github.io/se-bankruptcy-stress-scenarios/).
+
+**In plain words:** when unemployment rises, more small companies go bankrupt, and banks that lend to them lose money. This project measures how strongly Swedish bankruptcies have followed unemployment since 2009, then asks what would happen if the economy took a hit like the one in the European banking stress test. Bankruptcies would rise by about a third, most in restaurants and hotels, construction, trade and transport, so a bank should watch those industries first.
 
 ![Bankruptcy rates 2009 to today and baseline vs adverse scenario](reports/figures/hero.png)
+
+*How to read it: left, how many of every 100 companies went bankrupt over the past year in the three industries with the most bankruptcies; the grey and hatched areas mark crisis periods. Right, the same rate for all modelled industries: grey is history, blue the expected path, orange the path in a downturn, with the shaded band showing the range of likely outcomes.*
 
 ## Business question
 
@@ -40,7 +44,7 @@ with SME lending put on its watchlist, reprice or limit?
   38 %. A second, pre-registered round ([below](#round-2-a-better-model-after-the-weak-test))
   dropped GDP and the policy rate and added industry persistence: error
   0.125 in the same (now already seen) test period, a third lower, but still
-  not better than seasonal naive. Its scenarios are used here (`U0+IC085`); the
+  not better than seasonal naive. Its scenarios are used here (the unemployment-only model with a fading industry correction); the
   round-1 model gives almost the same headline (0.95 instead of
   0.98 per 100 firms).
 
@@ -48,7 +52,7 @@ with SME lending put on its watchlist, reprice or limit?
 
 1. **Watchlist:** put hotels and restaurants, construction, wholesale and retail trade, transport and storage on the watchlist. They are the
    4 industries whose *additional* bankruptcy rate under stress (adverse minus
-   baseline) is at least 1.25 × the average of 0.32 pp (round-2 rule, A10): hotels and
+   baseline) is at least 1.25 × the average of 0.32 pp (the rule set in round 2): hotels and
    restaurants +1.07 pp, construction +0.70, trade +0.69,
    transport +0.67. The original pre-registered rule (rate ≥ 1.25 × the industry's
    own historical mean) flags 9 of 9 and cannot separate them, because with a

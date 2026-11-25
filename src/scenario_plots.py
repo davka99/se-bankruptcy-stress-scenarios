@@ -12,6 +12,7 @@ import pandas as pd
 from src import config, plots
 
 HERO_SECTORS = ["HOR", "CON", "TRD"]
+HERO_STYLES = ["-", "-", (0, (5, 2))]  # trade dashed: it runs on top of construction
 
 
 def _dates(quarters) -> pd.DatetimeIndex:
@@ -25,12 +26,20 @@ def short(sector: str) -> str:
 def fig_hero(panel: pd.DataFrame, agg: pd.DataFrame, start: pd.Period, folder: Path) -> Path:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 4.6), gridspec_kw={"width_ratios": [1.4, 1]})
     labels = []
-    for color, s in zip(plots.HIGHLIGHT, HERO_SECTORS, strict=True):
+    for color, ls, s in zip(plots.HIGHLIGHT, HERO_STYLES, HERO_SECTORS, strict=True):
         g = panel[panel["sector"] == s].dropna(subset=["rate_r4"])
         d = _dates(g["quarter"])
-        ax1.plot(d, 100 * g["rate_r4"], color=color, lw=2)
+        ax1.plot(d, 100 * g["rate_r4"], color=color, lw=2, ls=ls)
         labels.append((d[-1], 100 * g["rate_r4"].iloc[-1], short(s)))
     plots.shade_episodes(ax1)
+    ax1.legend(
+        handles=plots.episode_handles(),
+        loc="lower center",
+        fontsize=8,
+        frameon=False,
+        handlelength=1.6,
+        borderaxespad=0.2,
+    )
     ax1.set_ylim(bottom=0)
     place_labels(ax1, labels, min_gap=0.12)
     ax1.set_xlim(right=labels[0][0] + pd.Timedelta(days=4 * 365))
@@ -58,10 +67,12 @@ def fig_hero(panel: pd.DataFrame, agg: pd.DataFrame, start: pd.Period, folder: P
     ax2.set_xlim(right=_dates([str(start + config.SCENARIO_HORIZON)])[0] + pd.Timedelta(days=500))
     adv = agg[agg["scenario"] == "adverse"]
     base = agg[agg["scenario"] == "baseline"]
-    peak = adv["p50"].max()
+    peak_row = adv.loc[adv["p50"].idxmax()]
+    # Compare with the baseline in the same quarter, not with the baseline's own maximum.
+    base_same_q = base.loc[base["quarter"] == peak_row["quarter"], "p50"].iloc[0]
     fig.suptitle(
-        f"Adverse scenario: the 12-month bankruptcy rate peaks at {100 * peak:.2f} per 100 firms, "
-        f"vs {100 * base['p50'].max():.2f} in the baseline",
+        f"Adverse scenario: the 12-month bankruptcy rate peaks at {100 * peak_row['p50']:.2f} "
+        f"per 100 firms in {peak_row['quarter']}, vs {100 * base_same_q:.2f} in the baseline",
         x=0.01,
         ha="left",
         fontweight="bold",
