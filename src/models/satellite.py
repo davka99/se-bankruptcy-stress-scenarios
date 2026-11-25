@@ -8,6 +8,10 @@ Variants (pre-registered, see docs/decisions.md):
     B        sector-specific slope on d_unemp, other slopes common
     C        B with sector slopes shrunk towards their precision-weighted mean (empirical Bayes)
     NOMACRO  baseline 3: same model without macro terms
+
+Round 2 (decisions A10) adds an optional intercept correction: at the end of the training
+data, c_s = log(sum count / sum mu) over each industry's last four quarters, and forecasts
+h quarters ahead are multiplied by exp(c_s * rho**h) (`Spec.ic_rho`).
 """
 
 from __future__ import annotations
@@ -21,6 +25,8 @@ from src import config
 from src.models.nb2 import NB2Result, fit_nb2, simulate_counts
 
 SHRINK_VAR = "d_unemp"
+IC_WINDOW = 4  # quarters used for the intercept correction (A10)
+POLICY_LAG_SUFFIX = "d_policy_l"  # derived regressor: d_policy k quarters earlier
 
 
 @dataclass(frozen=True)
@@ -32,6 +38,7 @@ class Spec:
     covid: tuple[str, str] | None = config.COVID_SUPPORT
     macro: tuple[str, ...] = tuple(config.MACRO_VARS)
     exclude_covid_quarters: bool = False
+    ic_rho: float | None = None  # A10 intercept correction; None = off
 
     @property
     def uses_macro(self) -> bool:
@@ -64,9 +71,22 @@ def covid_flag(quarters: pd.Series, window: tuple[str, str] | None) -> np.ndarra
     return ((p >= lo) & (p <= hi)).astype(float)
 
 
+def add_derived(macro: pd.DataFrame, variables: tuple[str, ...]) -> pd.DataFrame:
+    """Add derived regressors named `d_policy_l<k>` (d_policy k quarters earlier)."""
+    m = macro
+    for v in variables:
+        if v.startswith(POLICY_LAG_SUFFIX) and v not in m.columns:
+            k = int(v[len(POLICY_LAG_SUFFIX) :])
+            m = m.copy()
+            idx = pd.PeriodIndex(m.index.astype(str), freq="Q")
+            lagged = pd.Series(m["d_policy"].to_numpy(), index=idx + k)
+            m[v] = lagged.reindex(idx).to_numpy()
+    return m
+
+
 def lagged_macro(macro: pd.DataFrame, lag: int, variables: tuple[str, ...]) -> pd.DataFrame:
     """Macro values at q - lag, indexed by target quarter q (string 'YYYYQn')."""
-    m = macro.copy()
+    m = add_derived(macro, variables).copy()
     m.index = pd.PeriodIndex(m.index.astype(str), freq="Q")
     shifted = m[list(variables)].copy()
     shifted.index = shifted.index + lag
@@ -107,6 +127,18 @@ class FittedSatellite:
     shrunk: pd.Series | None = None  # variant C: shrunk sector slopes on SHRINK_VAR
     shrink_weights: pd.Series | None = None
     shrink_post_sd: pd.Series | None = None
+    ic: pd.Series | None = None  # A10 intercept correction per sector
+    ic_origin: pd.Period | None = None  # last training quarter
+
+    def ic_offset(self, rows: pd.DataFrame) -> np.ndarray:
+        """c_s * rho**h for each row (sector, quarter); zeros without a correction."""
+        if self.ic is None or self.spec.ic_rho is None:
+            return np.zeros(len(rows))
+        h = (pd.PeriodIndex(rows["quarter"].astype(str), freq="Q") - self.ic_origin).map(
+            lambda d: d.n
+        )
+        c = rows["sector"].map(self.ic).fillna(0.0).to_numpy()
+        return c * self.spec.ic_rho ** np.asarray(h, dtype=float)
 
     def _offset_extra(self, X: pd.DataFrame) -> np.ndarray:
         if self.shrunk is None:
@@ -135,6 +167,35 @@ class FittedSatellite:
 
 
 def fit(panel: pd.DataFrame, macro: pd.DataFrame, spec: Spec) -> FittedSatellite:
+    fitted = _fit(panel, macro, spec)
+    if spec.ic_rho is not None:
+        fitted.ic, fitted.ic_origin = intercept_correction(fitted, panel, macro)
+    return fitted
+
+
+def intercept_correction(
+    fitted: FittedSatellite, train: pd.DataFrame, macro: pd.DataFrame
+) -> tuple[pd.Series, pd.Period]:
+    """c_s = log(sum count / sum mu) over each industry's last IC_WINDOW training quarters
+    (in-sample fit of the model estimated on `train`)."""
+    qp = pd.PeriodIndex(train["quarter"].astype(str), freq="Q")
+    last = qp.max()
+    recent = train[(qp > last - IC_WINDOW) & (qp <= last)]
+    X = design(recent, macro, fitted.spec)
+    ok = X.notna().all(axis=1).to_numpy()
+    recent, X = recent[ok], X[ok]
+    mu = fitted.mu(X, np.log(recent["firms"].to_numpy(dtype=float)))
+    g = (
+        pd.DataFrame(
+            {"sector": recent["sector"].to_numpy(), "y": recent["count"].to_numpy(), "mu": mu}
+        )
+        .groupby("sector")[["y", "mu"]]
+        .sum()
+    )
+    return np.log(np.maximum(g["y"], 0.5) / g["mu"]), last
+
+
+def _fit(panel: pd.DataFrame, macro: pd.DataFrame, spec: Spec) -> FittedSatellite:
     data = panel
     if spec.exclude_covid_quarters and spec.covid is not None:
         data = panel[covid_flag(panel["quarter"], spec.covid) == 0]

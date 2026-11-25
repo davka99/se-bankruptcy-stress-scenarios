@@ -2,7 +2,7 @@
   "start_quarter": "2026Q3",
   "horizon_quarters": 12,
   "n_sim": 5000,
-  "model": "A_k0",
+  "model": "U0+IC085",
   "ki_vintage": {
     "database": "SenastePrognosen",
     "table_title": "Arbetsl\u00f6shet och syssels\u00e4ttningsgrad",

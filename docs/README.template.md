@@ -29,24 +29,32 @@ with SME lending put on its watchlist, reprice or limit?
   ({{ HOR_adv_peak_lo }}–{{ HOR_adv_peak_hi }}).
 - **Unemployment is the driver that matters:** a 1 percentage-point rise in unemployment
   over a year is associated with a {{ irr_d_unemp }} % change in expected bankruptcies (95 % CI {{ irr_d_unemp_ci }} %).
-  The selected model uses one common slope, so the *percentage* effect is the same in every
+  The model uses one common slope, so the *percentage* effect is the same in every
   industry; in *percentage points* it is largest in hotels and restaurants
-  (+{{ effect_pp_HOR }} pp) and construction (+{{ effect_pp_CON }} pp). GDP growth and the
-  policy rate add little once unemployment is in the model.
-- **Honest validation:** in the untouched test period (2023–2026) the model does **not**
-  beat a seasonal-naive forecast one year ahead (MAE {{ test_mae_sat }} vs
-  {{ test_mae_snaive }} pp of the annual rate), but it does beat the same model without
-  macro terms ({{ test_mae_nomacro }}). Its 80 % intervals covered only {{ test_cov_sat }} % of
-  outcomes, so the intervals shown here understate the true uncertainty.
+  (+{{ effect_pp_HOR }} pp) and construction (+{{ effect_pp_CON }} pp). GDP growth (wrong
+  sign, {{ r1_irr_gdp_yoy }} % per percentage point) and the policy rate ({{ r1_irr_d_policy }} %, not
+  significant) added nothing in round 1 and were dropped in round 2.
+- **Honest validation:** in the untouched test period (2023–2026) the first model did
+  **not** beat a seasonal-naive forecast one year ahead (MAE {{ test_mae_sat }} vs
+  {{ test_mae_snaive }} pp of the annual rate) and its 80 % intervals covered only
+  {{ test_cov_sat }} %. A second, pre-registered round ([below](#round-2-a-better-model-after-the-weak-test))
+  dropped GDP and the policy rate and added industry persistence: error
+  {{ r2_test_mae_U0_IC085 }} in the same (now already seen) test period, a third lower, but still
+  not better than seasonal naive. Its scenarios are used here (`{{ scenario_model }}`); the
+  round-1 model gives almost the same headline ({{ r1_total_adverse_peak }} instead of
+  {{ r2_total_adverse_peak }} per 100 firms).
 
 ## Recommendation
 
-1. **Watchlist (pre-registered rule):** under the adverse scenario all {{ watchlist_n }} industries
-   meet the criterion (median rate in some 4-quarter window ≥ 1.25 × its historical mean and
-   the 10th percentile above the mean). Because the selected model has a common slope, the
-   relative rise is similar everywhere, so priority is set by the increase in percentage
-   points: **{{ priority1 }}** (+{{ priority1_inc_pp }} pp vs its historical mean),
-   **{{ priority2 }}** (+{{ priority2_inc_pp }} pp) and **{{ priority3 }}** (+{{ priority3_inc_pp }} pp).
+1. **Watchlist:** put {{ r2_watchlist_names }} on the watchlist. They are the
+   {{ r2_watchlist_n }} industries whose *additional* bankruptcy rate under stress (adverse minus
+   baseline) is at least 1.25 × the average of {{ r2_avg_add_pp }} pp (round-2 rule, A10): hotels and
+   restaurants +{{ r2_add_pp_HOR }} pp, construction +{{ r2_add_pp_CON }}, trade +{{ r2_add_pp_TRD }},
+   transport +{{ r2_add_pp_TRN }}. The original pre-registered rule (rate ≥ 1.25 × the industry's
+   own historical mean) flags {{ watchlist_n }} of 9 and cannot separate them, because with a
+   common slope every industry rises by about the same percentage. By *number* of extra
+   bankruptcies, {{ r2_top_count_sector }} is largest ({{ r2_top_count_share }} % of the total): many
+   firms, low rate, so it matters for volume but not for pricing.
 2. **PD overlay:** apply a probability-weighted (70 % baseline / 30 % adverse) overlay of
    about {{ CON_overlay_weighted }} % to construction, {{ HOR_overlay_weighted }} % to hotels and restaurants and
    {{ TRD_overlay_weighted }} % to trade on top of through-the-cycle PDs (first scenario year; the
@@ -77,11 +85,15 @@ flowchart LR
   annual report after rounding (mean absolute deviation {{ anchor_mad_pp }} pp).
 - **Model:** negative binomial (NB2) regression of quarterly counts with log(firms) as
   offset, industry fixed effects, quarterly seasonality, a trend, a pandemic-support dummy
-  and the change in unemployment, GDP growth and the change in the policy rate. Poisson
+  and the change in unemployment over a year (round 1 also had GDP growth and the change in
+  the policy rate). Poisson
   shows strong overdispersion (Pearson χ²/df {{ poisson_dispersion }} vs {{ nb_dispersion }} for NB2).
 - **Pre-registration:** the 8-specification grid, the selection metric and the watchlist
   rule were committed before any model was estimated (`docs/decisions.md`, tag `prereg`).
-  Selected: `{{ model_spec }}` (common slopes, same-quarter drivers).
+  Selected in round 1: `{{ model_spec }}` (common slopes, same-quarter drivers). Round 2
+  (A10) was pre-registered after the weak test result and selected `{{ r2_winner }}`:
+  unemployment only, plus an industry intercept correction that carries each industry's
+  recent deviation from the model forward and fades by 15 % per quarter.
 - **Scenarios:** baseline = KI's latest forecast; adverse = baseline + (EBA adverse − EBA
   baseline) for scenario years 1–3, i.e. EBA's shock size moved to today's starting point.
   Unemployment peaks at {{ adverse_unemp_peak }} % in the adverse path.
@@ -139,6 +151,7 @@ src/build_panel.py panels and denominators
 src/eda.py         exploratory figures
 src/models/        NB2 estimator, satellite model, baselines
 src/backtest.py    selection and test-period backtest; src/realtime.py real-time variant
+src/round2.py      round-2 candidates, conformal bands, additional-rate watchlist (A10)
 src/scenarios.py   KI baseline, EBA deviations, simulation, watchlist, stress grid
 src/portfolio_overlay.py  synthetic portfolio, PD overlay, ECL
 src/monitoring.py  quarterly traffic-light monitoring
@@ -164,17 +177,58 @@ mean absolute deviation {{ anchor_mad_pp }} pp (max {{ anchor_max_pp }}). Monito
 ({{ monitoring_quarter }}): {{ monitoring_green }} green, {{ monitoring_yellow }} yellow,
 {{ monitoring_red }} red ({{ monitoring_red_sectors }}).
 
+### Round 2: a better model after the weak test
+
+After the round-1 test result, a second round was pre-registered in `docs/decisions.md`
+(A10, committed before any round-2 estimate) with five candidates, selection on the
+selection period only, and an adoption rule (at least 5 % better than round 1).
+
+![Round 2 backtest error by candidate](reports/figures/round2_backtest_mae.png)
+
+| h = 4, firm-weighted MAE (pp) | Selection period | Test period (already seen) | 80 % coverage, test |
+|---|---|---|---|
+| Round 1 `A_k0` (three macro drivers) | {{ r2_sel_mae_A_k0 }} | {{ r2_test_mae_A_k0 }} | {{ r2_test_cov_A_k0 }} % |
+| `U0` (unemployment only) | {{ r2_sel_mae_U0 }} | {{ r2_test_mae_U0 }} | {{ r2_test_cov_U0 }} % |
+| `U0_P4` (+ policy rate, lag 4) | {{ r2_sel_mae_U0_P4 }} | {{ r2_test_mae_U0_P4 }} | {{ r2_test_cov_U0_P4 }} % |
+| **`U0+IC085` (selected)** | **{{ r2_sel_mae_U0_IC085 }}** | **{{ r2_test_mae_U0_IC085 }}** | {{ r2_test_cov_U0_IC085 }} % |
+| `U0+IC1` (no fading) | {{ r2_sel_mae_U0_IC1 }} | {{ r2_test_mae_U0_IC1 }} | {{ r2_test_cov_U0_IC1 }} % |
+| Seasonal naive | {{ r2_sel_mae_snaive }} | {{ r2_test_mae_snaive }} | – |
+
+Coverage is re-simulated in round 2, so it can differ by about one point from the
+round-1 table above.
+
+- The selected model is {{ r2_improvement_pct }} % better than round 1 in the selection period,
+  so A10's adoption rule switches the scenarios to it. Unemployment effect:
+  {{ r2_irr_unemp }} % per percentage point (95 % CI {{ r2_irr_unemp_ci }} %).
+- In the test period it cuts the round-1 error by about a third but **still does not beat
+  seasonal naive** at four quarters. One quarter ahead it does: {{ r2_test_h1_mae_winner }} vs
+  {{ r2_test_h1_mae_snaive }} pp (round 1: {{ r2_test_h1_mae_A_k0 }}), because the correction uses the
+  latest quarters. The variant without fading (`U0+IC1`) does better in the test period,
+  but it tied in the selection period and lost the pre-registered tie-break; switching to
+  it now would be choosing on the test.
+- **Intervals:** empirical bands from selection-period errors cover {{ r2_conf_cov_h4 }} % of test
+  outcomes at four quarters ({{ r2_model_cov_h4 }} % with the model's own simulated bands) and
+  {{ r2_conf_cov_h8 }} % at eight quarters ({{ r2_model_cov_h8 }} %). Better, still below 80 %.
+- **What it means:** a one-year-ahead forecast of the bankruptcy rate is hard to beat with
+  "same quarter last year" when rates move slowly. The model's job here is to translate a
+  macro scenario into rates, which the naive forecast cannot do, and the scenario headline
+  barely moves between rounds ({{ r1_total_adverse_peak }} vs {{ r2_total_adverse_peak }} per 100 firms).
+
 ## Limitations
 
 - **Bankruptcy is not default.** Bank default (90 days past due or unlikely to pay) comes
   earlier and is broader; the overlay is therefore relative, not a PD level.
 - **Denominator:** FDB counts all registered enterprises, including dormant ones, so rates
   are low in absolute terms (agriculture especially).
-- **Few cycles and a weak test result:** the model loses to seasonal naive in the test
-  period and its intervals are too narrow (residuals are autocorrelated). Scenario bands
-  include parameter and count uncertainty only, not scenario uncertainty.
-- **Common slope:** the selected model gives the same percentage effect in every industry;
-  differences between industries come from their levels.
+- **Few cycles and a weak test result:** neither round beats seasonal naive in the test
+  period, and round 2 was designed after that period had been seen, so its test numbers
+  are not an untouched test. Intervals are too narrow even with empirical bands. Scenario
+  bands include parameter and count uncertainty only, not scenario uncertainty.
+- **Common slope:** the model gives the same percentage effect in every industry;
+  differences between industries come from their levels and from the intercept
+  correction. Industry-specific slopes did not improve the backtest (A6).
+- **The round-2 watchlist rule** was written after the round-1 percentage-point ranking was
+  seen (A10); both rules are reported.
 - **y/y drivers:** the effect of unemployment fades once unemployment stops rising, even if
   it stays high, so the adverse path returns towards the baseline in year 3.
 - **Pandemic break** handled with a dummy (2020Q2–2021Q4); estimates are sensitive to it

@@ -91,3 +91,45 @@ SOURCE_SCEN = (
     "Tillväxtanalys, SCB, Riksbank, Konjunkturinstitutet (baseline), EBA/ESRB 2025 "
     "stress test (adverse); own calculations."
 )
+
+
+def round2_mae(summary, winner: str, path: Path) -> Path:
+    """Round 2: firm-weighted MAE at h = 4 per candidate, selection vs test (seen) period."""
+    import numpy as np
+
+    apply_style()
+    s = summary[summary["h"] == config.SELECTION_HORIZON]
+    models = s[s["period"] == "selection"].sort_values("mae_rate_pct")["model"].tolist()
+    fig, ax = plt.subplots(figsize=(8.5, 4.2))
+    y = np.arange(len(models))
+    hgt = 0.38
+    for j, (period, colour, label) in enumerate(
+        (
+            ("selection", BASELINE, "Selection period (targets ≤ 2022Q4)"),
+            ("test", ADVERSE, "Test period 2023–2026 (already seen in A7)"),
+        )
+    ):
+        vals = s[s["period"] == period].set_index("model").reindex(models)["mae_rate_pct"]
+        ax.barh(y + (hgt / 2 if j == 0 else -hgt / 2), vals, height=hgt, color=colour, label=label)
+        for yi, v in zip(y, vals, strict=True):
+            if np.isfinite(v):
+                ax.text(
+                    v + 0.002,
+                    yi + (hgt / 2 if j == 0 else -hgt / 2),
+                    f"{v:.3f}",
+                    va="center",
+                    fontsize=8,
+                    color=INK,
+                )
+    labels = [f"{m}  (selected)" if m == winner else m for m in models]
+    ax.set_yticks(y, labels)
+    ax.invert_yaxis()
+    ax.grid(axis="y", visible=False)
+    ax.grid(axis="x", color=GRID)
+    ax.set_xlabel("Firm-weighted MAE of the annual bankruptcy rate, h = 4 (pp)")
+    ax.set_title("Round 2: which model forecasts a year ahead best?")
+    ax.legend(loc="lower right", fontsize=8.5)
+    source_note(fig, SOURCE_TVA)
+    fig.savefig(path)
+    plt.close(fig)
+    return path

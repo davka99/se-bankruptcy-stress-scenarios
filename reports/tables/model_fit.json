@@ -1,13 +1,13 @@
 {
-  "spec": "A_k0",
-  "nobs": 630,
-  "alpha": 0.02261862275162783,
-  "nb_pearson_chi2_df": 1.1081774339297652,
-  "poisson_pearson_chi2_df": 5.0511045835451815,
-  "loglik": -2925.528946006061,
+  "spec": "U0+IC085",
+  "nobs": 639,
+  "alpha": 0.02255768984200001,
+  "nb_pearson_chi2_df": 1.1018959321721413,
+  "poisson_pearson_chi2_df": 4.996965250853213,
+  "loglik": -2967.6224266503373,
   "converged": true,
   "sample": [
     "2009Q1",
-    "2026Q2"
+    "2026Q3"
   ]
 }

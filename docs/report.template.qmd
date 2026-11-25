@@ -51,17 +51,22 @@ every month.
 
 Negative binomial (NB2) regression of quarterly counts with log(firms) as offset, industry
 fixed effects, quarterly seasonality, a trend, a pandemic-support dummy (2020Q2–2021Q4,
-{{ irr_covid_support }} %, CI {{ irr_covid_support_ci }} %) and three macro drivers. Poisson
+{{ irr_covid_support }} %, CI {{ irr_covid_support_ci }} %) and macro drivers. Poisson
 is clearly overdispersed (Pearson χ²/df {{ poisson_dispersion }}; NB2: {{ nb_dispersion }}).
 
-| Driver (same quarter) | Effect on bankruptcies | 95 % CI |
-|---|---|---|
-| Unemployment, +1 pp y/y | {{ irr_d_unemp }} % | {{ irr_d_unemp_ci }} % |
-| GDP growth, +1 % y/y | {{ irr_gdp_yoy }} % | {{ irr_gdp_yoy_ci }} % |
-| Policy rate, +1 pp y/y | {{ irr_d_policy }} % | {{ irr_d_policy_ci }} % |
+| Driver (same quarter) | Round 1 `{{ model_spec }}` | 95 % CI | Round 2 `{{ r2_winner }}` | 95 % CI |
+|---|---|---|---|---|
+| Unemployment, +1 pp y/y | {{ r1_irr_d_unemp }} % | {{ r1_irr_d_unemp_ci }} % | {{ r2_irr_unemp }} % | {{ r2_irr_unemp_ci }} % |
+| GDP growth, +1 % y/y | {{ r1_irr_gdp_yoy }} % | {{ r1_irr_gdp_yoy_ci }} % | – | – |
+| Policy rate, +1 pp y/y | {{ r1_irr_d_policy }} % | {{ r1_irr_d_policy_ci }} % | – | – |
 
 The specification grid (8 models), the selection metric (firm-weighted MAE at four quarters)
-and the watchlist rule were committed before estimation. Selected: `{{ model_spec }}`.
+and the watchlist rule were committed before estimation. Selected: `{{ model_spec }}`. After
+the weak test result a second round was pre-registered (A10); it selected `{{ r2_winner }}`
+(unemployment only, plus a fading industry intercept correction), which is {{ r2_improvement_pct }} %
+better in the selection period and is used for the scenarios.
+
+![](figures/round2_backtest_mae.png)
 
 ![](figures/model_residual_diagnostics.png)
 

@@ -314,3 +314,26 @@ additional rate is ≥ 1.25 × the firm-weighted average additional rate across 
 industries **and** the 10th percentile of the additional rate is above 0. This rule is
 written after A8's percentage-point ranking was seen, so it is not blind to the result;
 it is reported next to the pre-registered rule, which is not changed.
+
+### A11 (2026-11-25, round 2): result, evaluated once after A10
+
+Source: `reports/tables/round2_backtest.csv`, `round2_selection.json`.
+- **Step 1 (macro form), selection period, h = 4:** `U0` 0.079, `U0_P4` 0.079, `A_k0`
+  0.082. `U0` is selected (simplest within 1 %). Dropping GDP and the policy rate does not
+  hurt; the policy rate at lag 4 adds nothing.
+- **Step 2 (intercept correction):** `U0+IC085` 0.075, `U0+IC1` 0.075, `U0` 0.079.
+  `U0+IC085` is selected (tie within 1 %, listed first). Improvement over `A_k0`: 8.8 %,
+  so the A10 adoption rule is met and the scenarios use `U0+IC085`.
+- **Test period (seen before, not an untouched test), h = 4:** `U0+IC085` 0.125,
+  `U0+IC1` 0.108, `A_k0` 0.171, seasonal naive 0.100. Round 2 still does not beat seasonal
+  naive at four quarters. At h = 1 it does (0.074 vs 0.100); at h = 8 it is close (0.181 vs
+  0.161). `U0+IC1` is better than the selected variant in the test period; it is **not**
+  switched to, because that would be choosing on the test.
+- **Intervals:** conformal bands from selection-period errors cover 84 / 73 / 62 % of test
+  outcomes at h = 1 / 4 / 8 (model bands: 85 / 64 / 41 %).
+- **Scenarios:** the adverse 12-month rate peaks at 0.98 per 100 firms in 2027Q4 (80 %
+  0.88–1.09) vs 0.95 with `A_k0`. The intercept correction raises most industries'
+  current level (it is positive in 8 of 9; manufacturing −0.10), so overlays relative to
+  historical means are larger than in round 1 and now differ by industry.
+- **Watchlist:** the A9 rule still flags 9 of 9. The A10 rule flags hotels and
+  restaurants, construction, trade, and transport and storage.

@@ -199,7 +199,7 @@ def simulate_paths(
         X["covid_support"] = 0.0  # the dummy is switched off in all forecasts
     if X.isna().any().any():
         raise ValueError("Missing macro drivers over the scenario horizon")
-    offset = np.log(rows["firms"].to_numpy(dtype=float))
+    offset = np.log(rows["firms"].to_numpy(dtype=float)) + fitted.ic_offset(rows)
     counts = fitted.simulate(X, offset, n_sim, rng)
     return counts * (4.0 / rows["firms"].to_numpy(dtype=float))[None, :]
 

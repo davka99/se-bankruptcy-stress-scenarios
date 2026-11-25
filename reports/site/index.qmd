@@ -13,11 +13,11 @@ format:
 ## Summary
 
 Under an EBA-based adverse scenario the 12-month bankruptcy rate across nine industries peaks
-at **0.95 per 100 firms** in 2027Q4 (80 % interval
-0.85–1.06), against 0.72 in
+at **0.98 per 100 firms** in 2027Q4 (80 % interval
+0.88–1.09), against 0.72 in
 the latest four quarters. In Konjunkturinstitutet's baseline the rate eases to
-0.60. A 1 percentage-point rise in unemployment over a year is associated with a
-+11.6 % change in expected bankruptcies (95 % CI +6.5 to +16.9 %).
+0.63. A 1 percentage-point rise in unemployment over a year is associated with a
++9.9 % change in expected bankruptcies (95 % CI +5.9 to +14.0 %).
 
 ![](figures/hero.png)
 
@@ -51,17 +51,22 @@ every month.
 
 Negative binomial (NB2) regression of quarterly counts with log(firms) as offset, industry
 fixed effects, quarterly seasonality, a trend, a pandemic-support dummy (2020Q2–2021Q4,
--26.0 %, CI -33.4 to -17.7 %) and three macro drivers. Poisson
-is clearly overdispersed (Pearson χ²/df 5.05; NB2: 1.11).
+-25.1 %, CI -31.9 to -17.6 %) and macro drivers. Poisson
+is clearly overdispersed (Pearson χ²/df 5.00; NB2: 1.10).
 
-| Driver (same quarter) | Effect on bankruptcies | 95 % CI |
-|---|---|---|
-| Unemployment, +1 pp y/y | +11.6 % | +6.5 to +16.9 % |
-| GDP growth, +1 % y/y | +0.5 % | -0.7 to +1.7 % |
-| Policy rate, +1 pp y/y | +0.9 % | -1.7 to +3.5 % |
+| Driver (same quarter) | Round 1 `A_k0` | 95 % CI | Round 2 `U0+IC085` | 95 % CI |
+|---|---|---|---|---|
+| Unemployment, +1 pp y/y | +11.6 % | +6.5 to +16.9 % | +9.9 % | +5.9 to +14.0 % |
+| GDP growth, +1 % y/y | +0.5 % | -0.7 to +1.7 % | – | – |
+| Policy rate, +1 pp y/y | +0.9 % | -1.7 to +3.5 % | – | – |
 
 The specification grid (8 models), the selection metric (firm-weighted MAE at four quarters)
-and the watchlist rule were committed before estimation. Selected: `A_k0`.
+and the watchlist rule were committed before estimation. Selected: `A_k0`. After
+the weak test result a second round was pre-registered (A10); it selected `U0+IC085`
+(unemployment only, plus a fading industry intercept correction), which is 9 %
+better in the selection period and is used for the scenarios.
+
+![](figures/round2_backtest_mae.png)
 
 ![](figures/model_residual_diagnostics.png)
 
@@ -87,18 +92,18 @@ the test-period MAE is 0.184.
 
 | Industry | Rate now | Adverse peak (80 % interval) | Window |
 |---|---|---|---|
-| Hotels and restaurants | 2.50 | 3.06 (2.63–3.55) | 2027Q1–2027Q4 |
-| Construction | 1.56 | 2.07 (1.79–2.38) | 2027Q1–2027Q4 |
-| Trade | 1.53 | 2.07 (1.79–2.38) | 2027Q1–2027Q4 |
-| Transport | 1.52 | 1.93 (1.66–2.24) | 2027Q1–2027Q4 |
-| Manufacturing | 0.75 | 1.22 (1.05–1.42) | 2027Q1–2027Q4 |
-| Information and communication | 0.73 | 0.84 (0.72–0.97) | 2027Q1–2027Q4 |
-| Finance, real estate, business services | 0.55 | 0.75 (0.65–0.86) | 2027Q1–2027Q4 |
-| Education, health, other services | 0.40 | 0.45 (0.39–0.52) | 2027Q1–2027Q4 |
+| Hotels and restaurants | 2.50 | 3.27 (2.81–3.79) | 2027Q1–2027Q4 |
+| Construction | 1.56 | 2.11 (1.83–2.41) | 2027Q1–2027Q4 |
+| Trade | 1.53 | 2.09 (1.81–2.39) | 2027Q1–2027Q4 |
+| Transport | 1.52 | 2.03 (1.74–2.36) | 2027Q1–2027Q4 |
+| Manufacturing | 0.75 | 1.12 (0.97–1.28) | 2027Q2–2028Q1 |
+| Information and communication | 0.73 | 0.93 (0.81–1.08) | 2027Q1–2027Q4 |
+| Finance, real estate, business services | 0.55 | 0.75 (0.66–0.86) | 2027Q1–2027Q4 |
+| Education, health, other services | 0.40 | 0.51 (0.44–0.58) | 2027Q1–2027Q4 |
 
 Rates are bankruptcies per 100 firms per year (rolling four quarters for "now", the
 four-quarter window average for the peak). Reverse stress test: unemployment would have to
-rise by 6.3 pp within a year (80 % interval 5.0–8.7)
+rise by 7.4 pp within a year (80 % interval 5.9–9.9)
 to double the bankruptcy rate; with the common slope this threshold is the same for every
 industry.
 
@@ -108,7 +113,7 @@ industry.
 
 The PD overlay is the scenario rate relative to the industry's historical mean and uses only
 real data. On a **synthetic** 5,000-loan SME portfolio (LGD 45 %, weights 70/30), the
-probability-weighted 12-month ECL is +17 % above the
+probability-weighted 12-month ECL is +24 % above the
 through-the-cycle ECL. This is a simplification of IFRS 9: no staging, no SICR, no lifetime PD.
 
 ## Monitoring

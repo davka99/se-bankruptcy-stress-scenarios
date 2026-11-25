@@ -27,9 +27,17 @@ LABELS = {
 }
 
 
-def selected_spec(tables: Path = config.TABLES) -> satellite.Spec:
+def round1_spec(tables: Path = config.TABLES) -> satellite.Spec:
+    """The model selected in round 1 (A6)."""
     name = json.loads((tables / "model_selection.json").read_text())["selected"]
     return next(s for s in backtest.all_specs() if s.name == name)
+
+
+def selected_spec(tables: Path = config.TABLES) -> satellite.Spec:
+    """The scenario model: the round-2 winner if A10's adoption rule was met, else round 1."""
+    from src import round2
+
+    return round2.scenario_spec(tables) or round1_spec(tables)
 
 
 def coefficient_table(fitted: satellite.FittedSatellite) -> pd.DataFrame:
@@ -82,7 +90,7 @@ def sensitivity(panel: pd.DataFrame, macro: pd.DataFrame, spec: satellite.Spec) 
     rows = []
     for name, sp in variants.items():
         f = satellite.fit(panel, macro, sp)
-        for v in config.MACRO_VARS:
+        for v in spec.macro:
             rows.append(
                 {
                     "variant": name,
@@ -94,7 +102,7 @@ def sensitivity(panel: pd.DataFrame, macro: pd.DataFrame, spec: satellite.Spec) 
             )
     fek = panel.dropna(subset=["firms_fek"]).assign(firms=lambda d: d["firms_fek"])
     f = satellite.fit(fek, macro, spec)
-    for v in config.MACRO_VARS:
+    for v in spec.macro:
         rows.append(
             {
                 "variant": "FEK denominator",
@@ -214,6 +222,10 @@ def main(out: Path = config.TABLES, figures: Path = config.FIGURES) -> dict:
 
     coef = coefficient_table(fitted)
     coef.to_csv(out / "coefficients.csv", index=False)
+    r1 = round1_spec(out)
+    coefficient_table(satellite.fit(panel, macro, r1)).to_csv(
+        out / "coefficients_round1.csv", index=False
+    )
     X = satellite.design(panel, macro, spec)
     ok = X.notna().all(axis=1).to_numpy()
     _, poisson_disp = fit_poisson(X[ok], panel["count"][ok], np.log(panel["firms"][ok]))

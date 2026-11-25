@@ -48,13 +48,20 @@ def compute(tables: Path = config.TABLES) -> dict:
 
     # Model
     fit = json.loads((tables / "model_fit.json").read_text())
-    k["model_spec"] = fit["spec"]
+    k["model_spec"] = json.loads((tables / "model_selection.json").read_text())["selected"]
+    k["scenario_model"] = fit["spec"]
     k["model_sample"] = f"{fit['sample'][0]}–{fit['sample'][1]}"
     k["nb_dispersion"] = f"{fit['nb_pearson_chi2_df']:.2f}"
     k["poisson_dispersion"] = f"{fit['poisson_pearson_chi2_df']:.2f}"
     coef = pd.read_csv(tables / "coefficients.csv").set_index("term")
+    coef1 = pd.read_csv(tables / "coefficients_round1.csv").set_index("term")
     for term in ("d_unemp", "gdp_yoy", "d_policy", "covid_support"):
-        r = coef.loc[term]
+        r = coef.loc[term] if term in coef.index else coef1.loc[term]
+        k[f"r1_irr_{term}"] = f"{100 * (coef1.loc[term, 'irr'] - 1):+.1f}"
+        k[f"r1_irr_{term}_ci"] = (
+            f"{100 * (coef1.loc[term, 'irr_lo'] - 1):+.1f} to "
+            f"{100 * (coef1.loc[term, 'irr_hi'] - 1):+.1f}"
+        )
         k[f"irr_{term}"] = f"{100 * (r['irr'] - 1):+.1f}"
         k[f"irr_{term}_ci"] = f"{100 * (r['irr_lo'] - 1):+.1f} to {100 * (r['irr_hi'] - 1):+.1f}"
     el = pd.read_csv(tables / "elasticity.csv").set_index("sector")
@@ -169,6 +176,61 @@ def compute(tables: Path = config.TABLES) -> dict:
     k["monitoring_red_sectors"] = (
         ", ".join(config.SECTORS[s].split(" (")[0] for s in reds) or "none"
     )
+    k.update(round2_numbers(tables))
+    return k
+
+
+def round2_numbers(tables: Path = config.TABLES) -> dict:
+    """Numbers from the round-2 model update (decisions A10)."""
+    k: dict = {}
+    info = json.loads((tables / "round2_selection.json").read_text())
+    k["r2_winner"] = info["winner"]
+    k["r2_form"] = info["macro_form"]
+    k["r2_adopted"] = info["adopted_for_scenarios"]
+    k["r2_improvement_pct"] = f"{100 * info['improvement_vs_A_k0_selection_h4']:.0f}"
+    unemp = next(c for c in info["coefficients_winner"] if c["term"] == "d_unemp")
+    k["r2_irr_unemp"] = f"{100 * (unemp['irr'] - 1):+.1f}"
+    k["r2_irr_unemp_ci"] = (
+        f"{100 * (unemp['irr_lo'] - 1):+.1f} to {100 * (unemp['irr_hi'] - 1):+.1f}"
+    )
+    bt = pd.read_csv(tables / "round2_backtest.csv")
+    h4 = bt[bt["h"] == config.SELECTION_HORIZON]
+    for period, tag in (("selection", "sel"), ("test", "test")):
+        f = h4[h4["period"] == period].set_index("model")
+        for m in f.index:
+            key = m.replace("+", "_").replace("seasonal_naive", "snaive")
+            k[f"r2_{tag}_mae_{key}"] = f"{f.loc[m, 'mae_rate_pct']:.3f}"
+            if pd.notna(f.loc[m, "coverage80"]):
+                k[f"r2_{tag}_cov_{key}"] = f"{100 * f.loc[m, 'coverage80']:.0f}"
+    h1 = bt[(bt["h"] == 1) & (bt["period"] == "test")].set_index("model")
+    k["r2_test_h1_mae_winner"] = f"{h1.loc[info['winner'], 'mae_rate_pct']:.3f}"
+    k["r2_test_h1_mae_snaive"] = f"{h1.loc['seasonal_naive', 'mae_rate_pct']:.3f}"
+    k["r2_test_h1_mae_A_k0"] = f"{h1.loc['A_k0', 'mae_rate_pct']:.3f}"
+    cov = pd.read_csv(tables / "round2_test_coverage.csv").set_index("h")
+    for h in config.HORIZONS:
+        k[f"r2_conf_cov_h{h}"] = f"{100 * cov.loc[h, 'coverage_conformal']:.0f}"
+        k[f"r2_model_cov_h{h}"] = f"{100 * cov.loc[h, 'coverage_model']:.0f}"
+    tot = pd.read_csv(tables / "round2_scenario_total.csv")
+    for model, tag in ((info["scenario_spec"]["name"], "r2"), ("A_k0", "r1")):
+        a = tot[(tot["model"] == model) & (tot["scenario"] == "adverse")]
+        i = a["p50"].idxmax()
+        k[f"{tag}_total_adverse_peak"] = pct(a.loc[i, "p50"])
+        k[f"{tag}_total_adverse_peak_lo"] = pct(a.loc[i, "p10"])
+        k[f"{tag}_total_adverse_peak_hi"] = pct(a.loc[i, "p90"])
+        k[f"{tag}_total_adverse_peak_q"] = a.loc[i, "quarter"]
+    wl = pd.read_csv(tables / "round2_watchlist.csv")
+    flagged = wl[wl["watchlist"]]
+    k["r2_watchlist_n"] = len(flagged)
+    k["r2_watchlist_names"] = ", ".join(
+        config.SECTORS[s].split(" (")[0].lower() for s in flagged["sector"]
+    )
+    k["r2_avg_add_pp"] = f"{100 * wl['firm_weighted_avg_add'].iloc[0]:.2f}"
+    for _, r in wl.iterrows():
+        k[f"r2_add_pp_{r['sector']}"] = f"{100 * r['add_p50']:.2f}"
+        k[f"r2_add_share_{r['sector']}"] = f"{100 * r['share_of_extra']:.0f}"
+    top = wl.sort_values("share_of_extra", ascending=False).iloc[0]
+    k["r2_top_count_sector"] = config.SECTORS[top["sector"]].split(" (")[0]
+    k["r2_top_count_share"] = f"{100 * top['share_of_extra']:.0f}"
     return k
 
 

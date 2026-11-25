@@ -51,7 +51,7 @@ def _nb_forecasts(
     X = satellite.design(target_rows, macro, fitted.spec)
     complete = X.notna().all(axis=1).to_numpy()  # e.g. GDP not yet published for the target
     X, target_rows = X[complete], target_rows[complete]
-    offset = np.log(target_rows["firms"].to_numpy(dtype=float))
+    offset = np.log(target_rows["firms"].to_numpy(dtype=float)) + fitted.ic_offset(target_rows)
     mu = fitted.mu(X, offset)
     sims = fitted.simulate(X, offset, n_sim, rng)
     scale = 4.0 / target_rows["firms"].to_numpy(dtype=float)

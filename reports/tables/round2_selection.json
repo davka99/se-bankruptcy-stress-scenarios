@@ -1,0 +1,42 @@
+{
+  "macro_form": "U0",
+  "winner": "U0+IC085",
+  "adopted_for_scenarios": true,
+  "improvement_vs_A_k0_selection_h4": 0.0884,
+  "scenario_spec": {
+    "name": "U0+IC085",
+    "lag": 0,
+    "variant": "A",
+    "trend": true,
+    "covid": [
+      "2020Q2",
+      "2021Q4"
+    ],
+    "macro": [
+      "d_unemp"
+    ],
+    "exclude_covid_quarters": false,
+    "ic_rho": 0.85
+  },
+  "intercept_correction_at_start": {
+    "AGR": 0.1459,
+    "CON": 0.0962,
+    "EHO": 0.2432,
+    "FRB": 0.0768,
+    "HOR": 0.1754,
+    "ICT": 0.2454,
+    "MAN": -0.1006,
+    "TRD": 0.0797,
+    "TRN": 0.1436
+  },
+  "coefficients_winner": [
+    {
+      "term": "d_unemp",
+      "coef": 0.09418445783592087,
+      "se": 0.018800588383388432,
+      "irr": 1.0987624025607639,
+      "irr_lo": 1.0590115591508584,
+      "irr_hi": 1.1400053255784364
+    }
+  ]
+}
