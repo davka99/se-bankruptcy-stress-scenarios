@@ -261,3 +261,56 @@ lags, especially for the policy rate; a sector-level persistence term).
   run. Detail tables differ only at floating-point level (MAE < 1e-6 pp); simulated
   interval coverage can differ by up to about 1 percentage point because the random draws
   depend on the linear-algebra backend. Re-running in the same environment is exact.
+
+### A10 (2026-11-25, round 2): pre-registration of a second model round, written before any round-2 estimate
+
+**Why a second round.** A7 showed that the selected model A_k0 does not beat seasonal naive
+in the test period (h = 4 MAE 0.171 vs 0.100 pp), that its 80 % intervals cover 38 %, and
+that GDP growth has the wrong sign; A8 showed that the pre-registered watchlist ratio
+cannot separate industries when the slope is common. A7 named two candidates: lags that
+differ by variable and a sector-level persistence term.
+
+**What is already known (so the round is not blind).** The test period 2023Q1–2026Q2 has
+been seen (A7), and so have the round-1 coefficients (GDP +0.5 % per pp, policy rate
++0.9 %, both not significant). Selection below therefore uses the **selection period
+only**; the test period is re-evaluated for every candidate and reported, but labelled
+"seen before" and not used to choose.
+
+**Candidates (6, no others).** All NB2 with firm offset, industry effects, quarter
+dummies, trend and pandemic dummy as in section 8.
+
+| Name | Macro terms | Intercept correction |
+|---|---|---|
+| `A_k0` | d_unemp, gdp_yoy, d_policy, lag 0 (round 1, reference) | – |
+| `U0` | d_unemp lag 0 | – |
+| `U0_P4` | d_unemp lag 0, d_policy lag 4 | – |
+| `M+IC1` | best of the three rows above | ρ = 1 |
+| `M+IC085` | best of the three rows above | ρ = 0.85 |
+
+*Intercept correction (persistence):* at each forecast origin, c_s = log(Σ count / Σ μ̂)
+over the industry's last four quarters up to the origin (in-sample fit of the model
+estimated at that origin). Forecasts for h quarters ahead are multiplied by
+exp(c_s · ρ^h). This carries a persistent industry deviation forward, which is the
+information seasonal naive uses, while keeping the macro mapping needed for scenarios.
+
+**Selection.** Lowest firm-weighted MAE of the annual rate at h = 4, selection period
+(targets ≤ 2022Q4), same origins as A6. Step 1 picks the macro form among `U0`, `A_k0`,
+`U0_P4` (ties within 1 % to the earlier name in that order, i.e. the simplest). Step 2
+compares that form with and without the intercept correction (order: none, IC085, IC1).
+
+**Adoption.** The round-2 winner replaces A_k0 as the scenario model **only if** its
+selection-period h = 4 MAE is at least 5 % lower than A_k0's. Otherwise A_k0 stays and
+round 2 is reported as a negative result.
+
+**Intervals.** Empirical (split-conformal) bands: for each horizon, the 10th and 90th
+percentiles of log(actual / forecast) of the winner in the selection period are applied
+as multiplicative bands. Coverage is reported for the test period.
+
+**Watchlist, round 2.** With a common slope, any ratio to an industry's own history moves
+the same way for every industry, so A8's rule flags all or none. The round-2 rule ranks
+by what a lender loses money on: the *additional* annual rate under stress, adverse minus
+baseline, in the worst rolling four-quarter window. An industry is flagged if the median
+additional rate is ≥ 1.25 × the firm-weighted average additional rate across the nine
+industries **and** the 10th percentile of the additional rate is above 0. This rule is
+written after A8's percentage-point ranking was seen, so it is not blind to the result;
+it is reported next to the pre-registered rule, which is not changed.
