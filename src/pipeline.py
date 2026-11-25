@@ -27,6 +27,11 @@ BUILD_STEPS = [
     ("src.backtest", "main_test"),
     ("src.realtime", "main"),
     ("src.model_report", "main"),
+    ("src.scenarios", "main"),
+    ("src.portfolio_overlay", "main"),
+    ("src.monitoring", "main"),
+    ("src.report_numbers", "main"),
+    ("src.render_readme", "main"),
 ]
 
 

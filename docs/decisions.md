@@ -217,3 +217,47 @@ uncertain.
 Not changed after seeing the test period: the specification, lag, trend and variables.
 Candidates for a future pre-registered round are listed under Limitations (variable-specific
 lags, especially for the policy rate; a sector-level persistence term).
+
+### A8 (2026-11-23, phase 4): scenario construction and watchlist outcome
+
+- **Start and horizon:** start 2026Q3 (last complete bankruptcy quarter), 12 quarters.
+  Exposure held at the November 2025 FDB stock. Pandemic dummy 0.
+- **Baseline:** KI `SenastePrognosen` (archive vintage 20260930). Unemployment uses KI's
+  quarterly table to 2027Q4 and then the annual table, interpolated with annual values at
+  mid-year. GDP levels are spliced to SCB's last published quarter by KI's growth rates.
+  Policy rate: KI's monthly averages.
+- **Adverse:** annual EBA deviations (adverse − baseline) for scenario years 1–3, reached
+  at the middle of each scenario year and interpolated linearly from 0 at the start, flat
+  after year 3: +3.8, +7.1, +7.0 pp unemployment; −5.5 %, −13.2 %, −14.5 % GDP level
+  (log); +1.2, +1.0, +0.8 pp short rate. EBA has a 3M SEK swap rate, not the policy rate;
+  its deviation is used for the policy rate.
+- **Plausibility check against EBA sector GVA:** the macro-financial scenario workbook
+  (corrigendum, Feb 2025) contains no sector GVA sheet, so this check is **not done**.
+- **Watchlist outcome:** the pre-registered rule flags **all nine** industries under the
+  adverse scenario (and also at 1.10 and 1.50). This follows from the selected model's
+  common slope: every industry's rate rises by about the same percentage. The rule does
+  not discriminate with variant A. To produce a usable shortlist, industries are
+  **prioritised by the increase in percentage points** (worst window median minus
+  historical mean). This prioritisation was chosen after seeing the scenario results and
+  is labelled as such; the pre-registered rule itself is reported unchanged.
+
+### A9 (2026-11-23, phase 5): presentation and monitoring
+
+- **Numbers in documents are generated.** `src/report_numbers.py` writes
+  `reports/tables/key_numbers.json`; README, decision memo and Quarto report are rendered
+  from templates in `docs/` by `python -m src.render_readme`, and `tests/test_readme.py`
+  fails if a committed document differs from a fresh rendering.
+- **Monitoring backfill:** the log starts with one-quarter-ahead forecasts from the
+  conditional backtest in the test period (labelled `backfill`). Every pipeline run then
+  registers the baseline forecast for the next quarter (`forecast_register.csv`); the
+  monthly refresh evaluates it once the quarter is complete (labelled `live`).
+- **ETS baseline:** implemented in-house as additive Holt-Winters with damped trend on
+  log rates (`src/models/baselines.py`), because statsmodels could not be installed in
+  the development environment. It is a baseline only; the NB2 estimator is the one
+  cross-checked against statsmodels.
+- **Pages:** `pages.yml` only runs when the repository is public (Pages on a free account).
+- **Cross-environment reproducibility:** a full pipeline run on GitHub's Ubuntu runner
+  (pinned versions) gave the same `key_numbers.json`, README and memo as the development
+  run. Detail tables differ only at floating-point level (MAE < 1e-6 pp); simulated
+  interval coverage can differ by up to about 1 percentage point because the random draws
+  depend on the linear-algebra backend. Re-running in the same environment is exact.
